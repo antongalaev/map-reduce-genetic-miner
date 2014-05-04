@@ -3,8 +3,8 @@ package org.processmining.models.heuristics.impl;
 import com.galaev.mapreduce.geneticminer.writables.arrays.XEventClassArrayWritable;
 import org.apache.hadoop.io.MapWritable;
 import org.apache.hadoop.io.Writable;
-import org.deckfour.xes.classification.XEventClassWritable;
-import org.deckfour.xes.classification.XEventClassesWritable;
+import org.deckfour.xes.classification.XEventClass;
+import org.deckfour.xes.classification.XEventClasses;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -24,15 +24,15 @@ import static java.util.Map.Entry;
  * @author Ana Karla Alves de Medeiros
  *
  */
-public class ActivitiesMappingStructuresWritable implements Writable {
+public class ActivitiesMappingStructures implements Writable {
 
     private static final String VISUALIZATION_SEPARATOR = ",";
 
-    private XEventClassesWritable xEventClasses; // allow to map the events to the internal indexes used for the activities
+    private XEventClasses xEventClasses; // allow to map the events to the internal indexes used for the activities
 
-    private XEventClassWritable[] activitiesMapping; //Maps activities to events
+    private XEventClass[] activitiesMapping; //Maps activities to events
 
-    private Map<XEventClassWritable, HNSubSetWritable> reverseActivitiesMapping; //Maps events to activities
+    private Map<XEventClass, HNSubSet> reverseActivitiesMapping; //Maps events to activities
 
     /**
      * Builds an <code>ActivitiesMappingStructuresWritable</code> object that contains a
@@ -43,13 +43,13 @@ public class ActivitiesMappingStructuresWritable implements Writable {
      *            event classes to which the activities mapping should be
      *            created.
      */
-    public ActivitiesMappingStructuresWritable(XEventClassesWritable events) {
+    public ActivitiesMappingStructures(XEventClasses events) {
         //building the mapping to indicate that every XEventClassWritable
         //has exactly one appearance in the HeuristicsNet
-        Map<XEventClassWritable, Integer> numberOfDuplicatesPerEvent = new HashMap<>();
-        for (XEventClassWritable XEventClassWritable : events.getClasses()) {
+        Map<XEventClass, Integer> numberOfDuplicatesPerEvent = new HashMap<>();
+        for (XEventClass XEventClass : events.getClasses()) {
             Integer numberDuplicates = 1; //It is "1" because there are no duplicates!
-            numberOfDuplicatesPerEvent.put(XEventClassWritable, numberDuplicates);
+            numberOfDuplicatesPerEvent.put(XEventClass, numberDuplicates);
         }
 
         //calling the method that creates the necessary internal structures
@@ -81,14 +81,14 @@ public class ActivitiesMappingStructuresWritable implements Writable {
      *         <code>XEventClassWritable</code> object.
      */
 
-    public ActivitiesMappingStructuresWritable(XEventClassesWritable events, Map<XEventClassWritable, Integer> numberOfActivitiesPerEvent)
+    public ActivitiesMappingStructures(XEventClasses events, Map<XEventClass, Integer> numberOfActivitiesPerEvent)
             throws IllegalArgumentException {
         //first, quick check to see if all activities have a number of activities
         if (events.size() != numberOfActivitiesPerEvent.size()) {
             throw new IllegalArgumentException("Missing number of activities for some events!");
         }
         //now, check if all numbers are bigger than zero ("0")
-        for (XEventClassWritable key : numberOfActivitiesPerEvent.keySet()) {
+        for (XEventClass key : numberOfActivitiesPerEvent.keySet()) {
             if (numberOfActivitiesPerEvent.get(key) < 1) {
                 throw new IllegalArgumentException(
                         "Some events have a number of activities that is inferior to one (\"1\")!");
@@ -109,7 +109,7 @@ public class ActivitiesMappingStructuresWritable implements Writable {
      *            Mapping indicating how many activities to create to each
      *            element in the input parameter events.
      */
-    private void initializeVariables(XEventClassesWritable events, Map<XEventClassWritable, Integer> numberOfActivitiesPerEvent) {
+    private void initializeVariables(XEventClasses events, Map<XEventClass, Integer> numberOfActivitiesPerEvent) {
 
         xEventClasses = events;
 
@@ -131,20 +131,20 @@ public class ActivitiesMappingStructuresWritable implements Writable {
      *            mapping specifying the number of activities per event.
      * @return an array of XEventClassWritable objects.
      */
-    private static XEventClassWritable[] createArrayWithCorrectNumberActivities(XEventClassesWritable events,
-                                                                                Map<XEventClassWritable, Integer> numberOfActivitiesPerEvent) {
-        ArrayList<XEventClassWritable> arrayList = new ArrayList<>();
+    private static XEventClass[] createArrayWithCorrectNumberActivities(XEventClasses events,
+                                                                                Map<XEventClass, Integer> numberOfActivitiesPerEvent) {
+        ArrayList<XEventClass> arrayList = new ArrayList<>();
 
-        Iterator<XEventClassWritable> iteratorOverEventClasses = events.getClasses().iterator();
+        Iterator<XEventClass> iteratorOverEventClasses = events.getClasses().iterator();
         while (iteratorOverEventClasses.hasNext()) {
-            XEventClassWritable currentEvent = iteratorOverEventClasses.next();
+            XEventClass currentEvent = iteratorOverEventClasses.next();
             int numberOfActivitiesToCreate = numberOfActivitiesPerEvent.get(currentEvent);
             for (int i = 0; i < numberOfActivitiesToCreate; i++) {
                 arrayList.add(currentEvent);
             }
         }
 
-        return arrayList.toArray(new XEventClassWritable[arrayList.size()]);
+        return arrayList.toArray(new XEventClass[arrayList.size()]);
 
     }
 
@@ -157,16 +157,16 @@ public class ActivitiesMappingStructuresWritable implements Writable {
      *            original mapping.
      * @return the reverse mapping of the original mapping.
      */
-    private static Map<XEventClassWritable, HNSubSetWritable> buildReverseActivitiesMapping(XEventClassWritable[] activitiesMapping) {
+    private static Map<XEventClass, HNSubSet> buildReverseActivitiesMapping(XEventClass[] activitiesMapping) {
 
-        Map<XEventClassWritable, HNSubSetWritable> reverseActivitiesMapping = new HashMap<>();
+        Map<XEventClass, HNSubSet> reverseActivitiesMapping = new HashMap<>();
 
         for (int index = 0; index < activitiesMapping.length; index++) {
-            XEventClassWritable currentEvent = activitiesMapping[index];
+            XEventClass currentEvent = activitiesMapping[index];
             if (!reverseActivitiesMapping.containsKey(currentEvent)) {
-                reverseActivitiesMapping.put(currentEvent, new HNSubSetWritable());
+                reverseActivitiesMapping.put(currentEvent, new HNSubSet());
             }
-            HNSubSetWritable activitiesMappingToCurrentEvent = reverseActivitiesMapping.get(currentEvent);
+            HNSubSet activitiesMappingToCurrentEvent = reverseActivitiesMapping.get(currentEvent);
             activitiesMappingToCurrentEvent.add(index);
             reverseActivitiesMapping.put(currentEvent, activitiesMappingToCurrentEvent);
         }
@@ -182,7 +182,7 @@ public class ActivitiesMappingStructuresWritable implements Writable {
      * @return XEventClasses event classes used by this
      *         <code>ActivitiesMappingStructuresWritable</code> object.
      */
-    public XEventClassesWritable getXEventClasses() {
+    public XEventClasses getXEventClasses() {
         return xEventClasses;
     }
 
@@ -192,7 +192,7 @@ public class ActivitiesMappingStructuresWritable implements Writable {
      *
      * @return array containing the current mapping.
      */
-    public XEventClassWritable[] getActivitiesMapping() {
+    public XEventClass[] getActivitiesMapping() {
         return activitiesMapping;
     }
 
@@ -202,7 +202,7 @@ public class ActivitiesMappingStructuresWritable implements Writable {
      *
      * @return Map mapping from <code>XEventClassWritable</code> events to activities.
      */
-    public Map<XEventClassWritable, HNSubSetWritable> getReverseActivitiesMapping() {
+    public Map<XEventClass, HNSubSet> getReverseActivitiesMapping() {
         return reverseActivitiesMapping;
     }
 
@@ -228,7 +228,7 @@ public class ActivitiesMappingStructuresWritable implements Writable {
         stringRepresentation.append("\n");
 
         stringRepresentation.append("Reverse Activities Mapping = [");
-        for (XEventClassWritable eventClass : reverseActivitiesMapping.keySet()) {
+        for (XEventClass eventClass : reverseActivitiesMapping.keySet()) {
             stringRepresentation.append(eventClass).append("=").append(reverseActivitiesMapping.get(eventClass))
                     .append(VISUALIZATION_SEPARATOR);
         }
@@ -253,10 +253,10 @@ public class ActivitiesMappingStructuresWritable implements Writable {
     @Override
     public boolean equals(Object o) {
 
-        if (!(o instanceof ActivitiesMappingStructuresWritable) || (o == null)) {
+        if (!(o instanceof ActivitiesMappingStructures) || (o == null)) {
             return false;
         } else {
-            ActivitiesMappingStructuresWritable other = (ActivitiesMappingStructuresWritable) o;
+            ActivitiesMappingStructures other = (ActivitiesMappingStructures) o;
             if (activitiesMapping.length != other.getActivitiesMapping().length) {
                 return false;
             } else {
@@ -302,13 +302,13 @@ public class ActivitiesMappingStructuresWritable implements Writable {
         // read activities mapping
         XEventClassArrayWritable arrayWritable = new XEventClassArrayWritable();
         arrayWritable.readFields(in);
-        activitiesMapping = (XEventClassWritable[]) arrayWritable.get();
+        activitiesMapping = (XEventClass[]) arrayWritable.get();
         // read reverse activities mapping
         MapWritable map = new MapWritable();
         map.readFields(in);
         for (Entry<Writable, Writable> entry : map.entrySet()) {
-            XEventClassWritable key = (XEventClassWritable) entry.getKey();
-            HNSubSetWritable value = (HNSubSetWritable) entry.getValue();
+            XEventClass key = (XEventClass) entry.getKey();
+            HNSubSet value = (HNSubSet) entry.getValue();
             reverseActivitiesMapping.put(key, value);
         }
     }
@@ -321,7 +321,7 @@ public class ActivitiesMappingStructuresWritable implements Writable {
  * @author Ana Karla Alves de Medeiros
  *
  */
-class XEventClassComparator implements Comparator<XEventClassWritable> {
+class XEventClassComparator implements Comparator<XEventClass> {
     /**
      * Compares two <code>XEventClassWritable</code> objects <code>o1</code> and
      * <code>o2</code>.
@@ -337,7 +337,7 @@ class XEventClassComparator implements Comparator<XEventClassWritable> {
      *         string for <code>o1</code> is lexicographically greater than the
      *         string for <code>o2</code>.
      */
-    public int compare(XEventClassWritable o1, XEventClassWritable o2) {
+    public int compare(XEventClass o1, XEventClass o2) {
         return o1.getId().compareTo(o2.getId());
     }
 

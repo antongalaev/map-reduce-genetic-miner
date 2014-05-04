@@ -16,7 +16,7 @@ import java.util.Map;
  * @author Peter van den Brand and Ana Karla Alves de Medeiros
  *
  */
-public class HNSubSetWritable  implements WritableComparable<HNSubSetWritable> {
+public class HNSubSet implements WritableComparable<HNSubSet> {
 
     private int[] subset;
     private int size;
@@ -36,21 +36,21 @@ public class HNSubSetWritable  implements WritableComparable<HNSubSetWritable> {
     /**
      * Constructs a <code>HNSubSetWritable</code> object
      */
-    public HNSubSetWritable() {
+    public HNSubSet() {
         subset = new int[10];
         size = 0;
         hash = 0;
     }
 
     // this constructor is only used by deepCopy
-    private HNSubSetWritable(HNSubSetWritable setToCopy) {
+    private HNSubSet(HNSubSet setToCopy) {
         subset = new int[setToCopy.subset.length];
         System.arraycopy(setToCopy.subset, 0, subset, 0, setToCopy.size);
         size = setToCopy.size;
         hash = setToCopy.hash;
     }
 
-    private HNSubSetWritable(int[] newSubset, int newSize, int newHash) {
+    private HNSubSet(int[] newSubset, int newSize, int newHash) {
         // TODO Auto-generated constructor stub
         subset = newSubset;//new int[newSubset.length];
         //		System.arraycopy(newSubset, 0, subset, 0, newSize);
@@ -100,11 +100,11 @@ public class HNSubSetWritable  implements WritableComparable<HNSubSetWritable> {
      * @return a new <code> HNSubSetWritable</code> object with the same contents of the
      *         this <code> HNSubSetWritable</code> object
      */
-    public final HNSubSetWritable deepCopy() {
-        return new HNSubSetWritable(this);
+    public final HNSubSet deepCopy() {
+        return new HNSubSet(this);
     }
 
-    public HNSubSetWritable deepCopy(Map<Integer, Integer> oldNewIndexMap) {
+    public HNSubSet deepCopy(Map<Integer, Integer> oldNewIndexMap) {
         // TODO Auto-generated method stub
 
         //HNSubSetWritable subset = new HNSubSetWritable();
@@ -116,7 +116,7 @@ public class HNSubSetWritable  implements WritableComparable<HNSubSetWritable> {
         int newSize = size;
         int newHash = hash;
 
-        return new HNSubSetWritable(newSubset, newSize, newHash);
+        return new HNSubSet(newSubset, newSize, newHash);
 
     }
 
@@ -127,7 +127,7 @@ public class HNSubSetWritable  implements WritableComparable<HNSubSetWritable> {
      * @param toAdd
      *            subset contains the values to add
      */
-    public void addAll(HNSubSetWritable toAdd) {
+    public void addAll(HNSubSet toAdd) {
         for (int i = 0; i < toAdd.size; i++) {
             add(toAdd.get(i));
         }
@@ -213,7 +213,7 @@ public class HNSubSetWritable  implements WritableComparable<HNSubSetWritable> {
      *            subset with values to be removed from this
      *            <code>HNSubSetWritable</code> object
      */
-    public void removeAll(HNSubSetWritable toRemove) {
+    public void removeAll(HNSubSet toRemove) {
         for (int i = 0; i < toRemove.size; i++) {
             remove(toRemove.get(i));
         }
@@ -250,7 +250,7 @@ public class HNSubSetWritable  implements WritableComparable<HNSubSetWritable> {
      *         smaller than this <code>HNSubSetWritable</code> object, <code>0</code> if
      *         both objects are the equal, and <code>1</code> otherwise.
      */
-    public int compareTo(HNSubSetWritable set) {
+    public int compareTo(HNSubSet set) {
         if (set == null) {
             return -1;
         }
@@ -276,7 +276,7 @@ public class HNSubSetWritable  implements WritableComparable<HNSubSetWritable> {
      */
     @Override
     public boolean equals(Object o) {
-        HNSubSetWritable set = (HNSubSetWritable) o;
+        HNSubSet set = (HNSubSet) o;
 
         if ((set == null) || (set.size != size) || (set.hash != hash)) {
             return false;

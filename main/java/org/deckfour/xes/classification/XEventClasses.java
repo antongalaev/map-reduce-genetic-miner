@@ -66,7 +66,7 @@ import static java.util.Map.Entry;
  * @author Christian W. Guenther (christian@deckfour.org)
  *
  */
-public class XEventClassesWritable implements Writable {
+public class XEventClasses implements Writable {
 
     /**
      * Creates a new set of event classes, factory method.
@@ -77,9 +77,9 @@ public class XEventClassesWritable implements Writable {
      *            The log, on which event classes should be imposed.
      * @return A set of event classes, as an instance of this class.
      */
-    public static synchronized XEventClassesWritable deriveEventClasses(
-            XEventAttributeClassifierWritable classifier, XLog log) {
-        XEventClassesWritable nClasses = new XEventClassesWritable(classifier);
+    public static synchronized XEventClasses deriveEventClasses(
+            XEventAttributeClassifier classifier, XLog log) {
+        XEventClasses nClasses = new XEventClasses(classifier);
         nClasses.register(log);
         nClasses.harmonizeIndices();
         return nClasses;
@@ -88,11 +88,11 @@ public class XEventClassesWritable implements Writable {
     /**
      * The classifier used for creating the set of event classes.
      */
-    protected XEventAttributeClassifierWritable classifier;
+    protected XEventAttributeClassifier classifier;
     /**
      * Map holding the event classes, indexed by their unique identifier string.
      */
-    protected HashMap<String, XEventClassWritable> classMap;
+    protected HashMap<String, XEventClass> classMap;
 
     /**
      * Creates a new instance, i.e. an empty set of event classes.
@@ -100,7 +100,7 @@ public class XEventClassesWritable implements Writable {
      * @param classifier
      *            The classifier used for event comparison.
      */
-    public XEventClassesWritable(XEventAttributeClassifierWritable classifier) {
+    public XEventClasses(XEventAttributeClassifier classifier) {
         this.classifier = classifier;
         this.classMap = new HashMap<>();
     }
@@ -119,7 +119,7 @@ public class XEventClassesWritable implements Writable {
      *
      * @return A collection of event classes.
      */
-    public Collection<XEventClassWritable> getClasses() {
+    public Collection<XEventClass> getClasses() {
         return classMap.values();
     }
 
@@ -142,7 +142,7 @@ public class XEventClassesWritable implements Writable {
      *         classes. If no matching event class is found, this method may
      *         return <code>null</code>.
      */
-    public XEventClassWritable getClassOf(XEvent event) {
+    public XEventClass getClassOf(XEvent event) {
         return classMap.get(classifier.getClassIdentity(event));
     }
 
@@ -155,7 +155,7 @@ public class XEventClassesWritable implements Writable {
      * @return The requested event class. If no matching event class is found,
      *         this method may return <code>null</code>.
      */
-    public XEventClassWritable getByIdentity(String classIdentity) {
+    public XEventClass getByIdentity(String classIdentity) {
         return classMap.get(classIdentity);
     }
 
@@ -167,8 +167,8 @@ public class XEventClassesWritable implements Writable {
      * @return The requested event class. If no matching event class is found,
      *         this method may return <code>null</code>.
      */
-    public XEventClassWritable getByIndex(int index) {
-        for (XEventClassWritable eventClass : classMap.values()) {
+    public XEventClass getByIndex(int index) {
+        for (XEventClass eventClass : classMap.values()) {
             if (eventClass.getIndex() == index) {
                 return eventClass;
             }
@@ -218,9 +218,9 @@ public class XEventClassesWritable implements Writable {
      */
     public synchronized void register(XEvent event) {
         String classId = classifier.getClassIdentity(event);
-        XEventClassWritable eventClass = classMap.get(classId);
+        XEventClass eventClass = classMap.get(classId);
         if (eventClass == null && classId != null) {
-            eventClass = new XEventClassWritable(classId, classMap.size());
+            eventClass = new XEventClass(classId, classMap.size());
             classMap.put(classId, eventClass);
         }
         if (eventClass != null) {
@@ -238,12 +238,12 @@ public class XEventClassesWritable implements Writable {
      * harmonization, and can thus safely ignore this method.
      */
     public synchronized void harmonizeIndices() {
-        ArrayList<XEventClassWritable> classList = new ArrayList<XEventClassWritable>(classMap.values());
+        ArrayList<XEventClass> classList = new ArrayList<XEventClass>(classMap.values());
         Collections.sort(classList);
         classMap.clear();
         for (int i = 0; i < classList.size(); i++) {
-            XEventClassWritable original = classList.get(i);
-            XEventClassWritable harmonized = new XEventClassWritable(original.getId(), i);
+            XEventClass original = classList.get(i);
+            XEventClass harmonized = new XEventClass(original.getId(), i);
             harmonized.setSize(original.size());
             classMap.put(harmonized.getId(), harmonized);
         }
@@ -255,8 +255,8 @@ public class XEventClassesWritable implements Writable {
      * terms of this method.
      */
     public boolean equals(Object o) {
-        if (o instanceof XEventClassesWritable) {
-            return ((XEventClassesWritable) o).getClassifier().equals(this.classifier);
+        if (o instanceof XEventClasses) {
+            return ((XEventClasses) o).getClassifier().equals(this.classifier);
         } else {
             return false;
         }
@@ -270,7 +270,7 @@ public class XEventClassesWritable implements Writable {
     public void write(DataOutput out) throws IOException {
         classifier.write(out);
         MapWritable map = new MapWritable();
-        for (Entry<String, XEventClassWritable> entry : classMap.entrySet()) {
+        for (Entry<String, XEventClass> entry : classMap.entrySet()) {
             map.put(new Text(entry.getKey()),entry.getValue());
         }
         map.write(out);
@@ -283,7 +283,7 @@ public class XEventClassesWritable implements Writable {
         map.readFields(in);
         for (Entry<Writable, Writable> entry : map.entrySet()) {
             String key = entry.getKey().toString();
-            XEventClassWritable value = (XEventClassWritable) entry.getValue();
+            XEventClass value = (XEventClass) entry.getValue();
             classMap.put(key, value);
         }
     }

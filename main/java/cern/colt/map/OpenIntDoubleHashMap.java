@@ -35,7 +35,7 @@ import java.io.IOException;
  @version 1.0, 09/24/99
  @see	    java.util.HashMap
  */
-public class OpenIntDoubleHashMapWritable extends AbstractIntDoubleMap implements Writable {
+public class OpenIntDoubleHashMap extends AbstractIntDoubleMap implements Writable {
     //public static int hashCollisions = 0;
     /**
      * The hash table keys.
@@ -69,7 +69,7 @@ public class OpenIntDoubleHashMapWritable extends AbstractIntDoubleMap implement
     /**
      * Constructs an empty map with default capacity and default load factors.
      */
-    public OpenIntDoubleHashMapWritable() {
+    public OpenIntDoubleHashMap() {
         this(defaultCapacity);
     }
     /**
@@ -79,7 +79,7 @@ public class OpenIntDoubleHashMapWritable extends AbstractIntDoubleMap implement
      * @throws     IllegalArgumentException if the initial capacity is less
      *             than zero.
      */
-    public OpenIntDoubleHashMapWritable(int initialCapacity) {
+    public OpenIntDoubleHashMap(int initialCapacity) {
         this(initialCapacity, defaultMinLoadFactor, defaultMaxLoadFactor);
     }
     /**
@@ -91,7 +91,7 @@ public class OpenIntDoubleHashMapWritable extends AbstractIntDoubleMap implement
      * @param      maxLoadFactor        the maximum load factor.
      * @throws	IllegalArgumentException if <tt>initialCapacity < 0 || (minLoadFactor < 0.0 || minLoadFactor >= 1.0) || (maxLoadFactor <= 0.0 || maxLoadFactor >= 1.0) || (minLoadFactor >= maxLoadFactor)</tt>.
      */
-    public OpenIntDoubleHashMapWritable(int initialCapacity, double minLoadFactor, double maxLoadFactor) {
+    public OpenIntDoubleHashMap(int initialCapacity, double minLoadFactor, double maxLoadFactor) {
         setUp(initialCapacity,minLoadFactor,maxLoadFactor);
     }
     /**
@@ -124,12 +124,12 @@ public class OpenIntDoubleHashMapWritable extends AbstractIntDoubleMap implement
      * @param other the other map to be copied into the receiver.
      */
     public void assign(AbstractIntDoubleMap other) {
-        if (!(other instanceof OpenIntDoubleHashMapWritable)) {
+        if (!(other instanceof OpenIntDoubleHashMap)) {
             super.assign(other);
             return;
         }
-        OpenIntDoubleHashMapWritable source = (OpenIntDoubleHashMapWritable) other;
-        OpenIntDoubleHashMapWritable copy = (OpenIntDoubleHashMapWritable) source.copy();
+        OpenIntDoubleHashMap source = (OpenIntDoubleHashMap) other;
+        OpenIntDoubleHashMap copy = (OpenIntDoubleHashMap) source.copy();
         this.values = copy.values;
         this.table = copy.table;
         this.state = copy.state;
@@ -168,7 +168,7 @@ public class OpenIntDoubleHashMapWritable extends AbstractIntDoubleMap implement
      * @return  a deep copy of the receiver.
      */
     public Object clone() {
-        OpenIntDoubleHashMapWritable copy = (OpenIntDoubleHashMapWritable) super.clone();
+        OpenIntDoubleHashMap copy = (OpenIntDoubleHashMap) super.clone();
         copy.table = (int[]) copy.table.clone();
         copy.values = (double[]) copy.values.clone();
         copy.state = (byte[]) copy.state.clone();

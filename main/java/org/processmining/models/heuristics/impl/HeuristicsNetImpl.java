@@ -2,9 +2,16 @@ package org.processmining.models.heuristics.impl;
 
 import cern.colt.matrix.DoubleFactory2D;
 import cern.colt.matrix.DoubleMatrix2D;
-import cern.colt.matrix.impl.SparseDoubleMatrix2DWritable;
+import com.galaev.mapreduce.geneticminer.writables.arrays.HNSetArrayWritable;
+import com.galaev.mapreduce.geneticminer.writables.arrays.IntArrayWritable;
+import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.Writable;
+import org.apache.hadoop.io.WritableComparable;
 import org.processmining.models.heuristics.HeuristicsNet;
 
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -16,19 +23,19 @@ import java.util.Map;
  *
  */
 
-public class HeuristicsNetImplWritable implements Comparable<HeuristicsNet>, HeuristicsNet {
+public class HeuristicsNetImpl implements WritableComparable<HeuristicsNet>, HeuristicsNet {
 
     private ActivitiesMappingStructures activitiesMappingStructures = null; //contains all the necessary mappings from activities to XEventClasses, and vice-versa.
 
     //Internal structures based on the indexes for the activities
-    private final HNSetWritable[] inputSets; //input sets
-    private final HNSetWritable[] outputSets; // output sets
-    private HNSubSetWritable startActivities; //the HeuristicsNet can have multiple starting activities
-    private HNSubSetWritable endActivities; //the HeuristicsNet can have multiple end activities
+    private HNSet[] inputSets; //input sets
+    private HNSet[] outputSets; // output sets
+    private HNSubSet startActivities; //the HeuristicsNet can have multiple starting activities
+    private HNSubSet endActivities; //the HeuristicsNet can have multiple end activities
     private double fitness; //fitness of the HeuristicsNet
-    private final int size; //number of activities in the HeuristicsNet
+    private int size; //number of activities in the HeuristicsNet
     private int[] activitiesActualFiring; //Keeps track of how often activities have been executed during the log replay
-    private SparseDoubleMatrix2DWritable arcUsage; //Keeps track of how often arcs have been used during the log replay
+    private DoubleMatrix2D arcUsage; //Keeps track of how often arcs have been used during the log replay
 
     //Constants used to build the string representation of a HeuristicsNet
     /**
@@ -90,15 +97,15 @@ public class HeuristicsNetImplWritable implements Comparable<HeuristicsNet>, Heu
      *            object with the correct number of activities per
      *            <code>XEventClass</code> for a given log.
      */
-    public HeuristicsNetImplWritable(ActivitiesMappingStructures activitiesMappingStructures) {
+    public HeuristicsNetImpl(ActivitiesMappingStructures activitiesMappingStructures) {
 
         this.activitiesMappingStructures = activitiesMappingStructures;
 
         size = this.activitiesMappingStructures.getActivitiesMapping().length;
 
-        inputSets = new HNSetWritable[size];
+        inputSets = new HNSet[size];
 
-        outputSets = new HNSetWritable[size];
+        outputSets = new HNSet[size];
 
         fitness = 0;
 
@@ -422,7 +429,7 @@ public class HeuristicsNetImplWritable implements Comparable<HeuristicsNet>, Heu
      *            new set for this activity
      * @return true if the update was successful, false otherwise.
      */
-    private boolean setSet(HNSetWritable[] target, int index, HNSetWritable sets) {
+    private boolean setSet(HNSet[] target, int index, HNSet sets) {
         if (index < size()) {
             target[index] = sets;
             return true;
@@ -480,7 +487,7 @@ public class HeuristicsNetImplWritable implements Comparable<HeuristicsNet>, Heu
      *            activity index.
      * @return Set linked to this activity index in the target array.
      */
-    private HNSetWritable getSet(HNSetWritable[] target, int index) {
+    private HNSet getSet(HNSet[] target, int index) {
         if ((index >= 0) && (index < size())) {
             return target[index];
         }
@@ -535,7 +542,7 @@ public class HeuristicsNetImplWritable implements Comparable<HeuristicsNet>, Heu
 
         //creating the copy...
 
-        copy = new HeuristicsNetImplWritable(activitiesMappingStructures);
+        copy = new HeuristicsNetImpl(activitiesMappingStructures);
 
         //writing the input/output sets...
         for (int i = 0; i < size(); i++) {
@@ -629,7 +636,7 @@ public class HeuristicsNetImplWritable implements Comparable<HeuristicsNet>, Heu
      * (int)
      */
     public HNSubSet getAllElementsInputSet(int index) {
-        return HNSet.getUnionSet(inputSets[index]);
+        return org.processmining.models.heuristics.impl.HNSet.getUnionSet(inputSets[index]);
     }
 
     /*
@@ -639,7 +646,7 @@ public class HeuristicsNetImplWritable implements Comparable<HeuristicsNet>, Heu
      * getAllElementsOutputSet(int)
      */
     public HNSubSet getAllElementsOutputSet(int index) {
-        return HNSet.getUnionSet(outputSets[index]);
+        return org.processmining.models.heuristics.impl.HNSet.getUnionSet(outputSets[index]);
     }
 
     /*
@@ -668,10 +675,10 @@ public class HeuristicsNetImplWritable implements Comparable<HeuristicsNet>, Heu
      * contain "element". Returns null if there is not such subsets with
      * element.
      */
-    private HNSet getSetsWithElement(HNSetWritable[] indSet, int index, int element) {
+    private HNSet getSetsWithElement(HNSet[] indSet, int index, int element) {
         HNSet set = null;
         HNSubSet subSet = null;
-        HNSetWritable filterFromSet = null;
+        HNSet filterFromSet = null;
 
         if (index < indSet.length) {
             filterFromSet = indSet[index];
@@ -740,9 +747,9 @@ public class HeuristicsNetImplWritable implements Comparable<HeuristicsNet>, Heu
         for (int i = 0; i < size; i++) {
             for (int iUnfiredElements = 0; iUnfiredElements < unfiredElements.size(); iUnfiredElements++) {
                 //clean input sets...
-                inputSets[i] = HNSet.removeElementFromSubsets(inputSets[i], unfiredElements.get(iUnfiredElements));
+                inputSets[i] = org.processmining.models.heuristics.impl.HNSet.removeElementFromSubsets(inputSets[i], unfiredElements.get(iUnfiredElements));
                 //clean output sets...
-                outputSets[i] = HNSet.removeElementFromSubsets(outputSets[i], unfiredElements.get(iUnfiredElements));
+                outputSets[i] = org.processmining.models.heuristics.impl.HNSet.removeElementFromSubsets(outputSets[i], unfiredElements.get(iUnfiredElements));
             }
         }
 
@@ -768,8 +775,8 @@ public class HeuristicsNetImplWritable implements Comparable<HeuristicsNet>, Heu
         for (int row = 0; row < arcUsage.rows(); row++) {
             for (int column = 0; column < arcUsage.columns(); column++) {
                 if (arcUsage.get(row, column) <= threshold) {
-                    outputSets[row] = HNSet.removeElementFromSubsets(outputSets[row], column);
-                    inputSets[column] = HNSet.removeElementFromSubsets(inputSets[column], row);
+                    outputSets[row] = org.processmining.models.heuristics.impl.HNSet.removeElementFromSubsets(outputSets[row], column);
+                    inputSets[column] = org.processmining.models.heuristics.impl.HNSet.removeElementFromSubsets(inputSets[column], row);
                     arcUsage.set(row, column, 0.0);
 
                 }
@@ -809,4 +816,61 @@ public class HeuristicsNetImplWritable implements Comparable<HeuristicsNet>, Heu
         return unfiredElements;
     }
 
+    @Override
+    public void write(DataOutput out) throws IOException {
+        // write primitives
+        out.writeInt(size);
+        out.writeDouble(fitness);
+        // write start/end HNSubSets
+        startActivities.write(out);
+        endActivities.write(out);
+        // write mapping
+        activitiesMappingStructures.write(out);
+        // write matrix
+        ((Writable) arcUsage).write(out);
+        // write activities actual firing
+        IntWritable[] intWritables = new IntWritable[activitiesActualFiring.length];
+        for (int i = 0; i < activitiesActualFiring.length; ++i) {
+            intWritables[i] = new IntWritable(activitiesActualFiring[i]);
+        }
+        IntArrayWritable arrayWritable = new IntArrayWritable();
+        arrayWritable.set(intWritables);
+        arrayWritable.write(out);
+        // write input and output sets
+        HNSetArrayWritable hnSetArrayWritable = new HNSetArrayWritable();
+        hnSetArrayWritable.set(inputSets);
+        hnSetArrayWritable.write(out);
+        hnSetArrayWritable = new HNSetArrayWritable();
+        hnSetArrayWritable.set(outputSets);
+        hnSetArrayWritable.write(out);
+    }
+
+    @Override
+    public void readFields(DataInput in) throws IOException {
+        // read primitives
+        size = in.readInt();
+        fitness = in.readDouble();
+        // read start/end HNSubSets
+        startActivities.readFields(in);
+        endActivities.readFields(in);
+        // read mapping
+        activitiesMappingStructures.readFields(in);
+        // read matrix
+        ((Writable) arcUsage).readFields(in);
+        // read activities actual firing
+        IntArrayWritable arrayWritable = new IntArrayWritable();
+        arrayWritable.readFields(in);
+        IntWritable[] intWritables = (IntWritable[]) arrayWritable.get();
+        activitiesActualFiring = new int[intWritables.length];
+        for (int i = 0; i < activitiesActualFiring.length; ++i) {
+            activitiesActualFiring[i] = intWritables[i].get();
+        }
+        // read input and output sets
+        HNSetArrayWritable hnSetArrayWritable = new HNSetArrayWritable();
+        hnSetArrayWritable.readFields(in);
+        inputSets = (HNSet[]) hnSetArrayWritable.get();
+        hnSetArrayWritable = new HNSetArrayWritable();
+        hnSetArrayWritable.readFields(in);
+        outputSets = (HNSet[]) hnSetArrayWritable.get();
+    }
 }

@@ -58,8 +58,8 @@ import java.util.Arrays;
  * @author Christian W. Guenther (christian@deckfour.org)
  *
  */
-public class XEventAttributeClassifierWritable implements XEventClassifier,
-        WritableComparable<XEventAttributeClassifierWritable> {
+public class XEventAttributeClassifier implements XEventClassifier,
+        WritableComparable<XEventAttributeClassifier> {
 
     /**
      * Keys of the attributes used for event comparison.
@@ -79,7 +79,7 @@ public class XEventAttributeClassifierWritable implements XEventClassifier,
      * @param keys
      *            Attribute to be used for event classification.
      */
-    public XEventAttributeClassifierWritable(String name, String... keys) {
+    public XEventAttributeClassifier(String name, String... keys) {
         this.name = name;
         this.keys = keys;
         Arrays.sort(keys);
@@ -159,7 +159,7 @@ public class XEventAttributeClassifierWritable implements XEventClassifier,
      *
      * @see java.lang.Comparable#compareTo(java.lang.Object)
      */
-    public int compareTo(XEventAttributeClassifierWritable o) {
+    public int compareTo(XEventAttributeClassifier o) {
         if (!o.name.equals(name)) {
             return name.compareTo(o.name);
         } else {
@@ -176,10 +176,10 @@ public class XEventAttributeClassifierWritable implements XEventClassifier,
     }
 
     public boolean equals(Object o) {
-        if (!(o instanceof XEventAttributeClassifierWritable)) {
+        if (!(o instanceof XEventAttributeClassifier)) {
             return false;
         }
-        return compareTo((XEventAttributeClassifierWritable) o) == 0;
+        return compareTo((XEventAttributeClassifier) o) == 0;
     }
 
     public void accept(XVisitor visitor, XLog log) {

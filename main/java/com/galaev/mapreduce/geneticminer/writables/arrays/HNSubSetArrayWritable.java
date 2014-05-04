@@ -1,6 +1,6 @@
 package com.galaev.mapreduce.geneticminer.writables.arrays;
 
-import org.processmining.models.heuristics.impl.HNSubSetWritable;
+import org.processmining.models.heuristics.impl.HNSubSet;
 import org.apache.hadoop.io.ArrayWritable;
 
 /**
@@ -11,7 +11,7 @@ import org.apache.hadoop.io.ArrayWritable;
  */
 public class HNSubSetArrayWritable extends ArrayWritable {
 
-    HNSubSetArrayWritable() {
-        super(HNSubSetWritable.class);
+    public HNSubSetArrayWritable() {
+        super(HNSubSet.class);
     }
 }

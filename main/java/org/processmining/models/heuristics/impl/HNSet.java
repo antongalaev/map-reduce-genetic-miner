@@ -15,23 +15,23 @@ import java.util.Map;
  * @author Peter van den Brand and Ana Karla Alves de Medeiros
  *
  */
-public class HNSetWritable implements Writable {
+public class HNSet implements Writable {
 
-    private HNSubSetWritable[] set;
+    private HNSubSet[] set;
     private int size;
 
     /**
      * Constructs a <code>HNSetWritable</code> object
      */
-    public HNSetWritable() {
-        set = new HNSubSetWritable[10];
+    public HNSet() {
+        set = new HNSubSet[10];
         size = 0;
 
     }
 
     // this constructor is only used by deepCopy
-    private HNSetWritable(HNSetWritable setToCopy) {
-        set = new HNSubSetWritable[setToCopy.set.length];
+    private HNSet(HNSet setToCopy) {
+        set = new HNSubSet[setToCopy.set.length];
         size = setToCopy.size;
 
         for (int i = 0; i < size; i++) {
@@ -39,7 +39,7 @@ public class HNSetWritable implements Writable {
         }
     }
 
-    private HNSetWritable(HNSubSetWritable[] newSet, int newSize) {
+    private HNSet(HNSubSet[] newSet, int newSize) {
         // TODO Auto-generated constructor stub
         set = newSet;//new HNSubSet[newSet.length];
         size = newSize;
@@ -67,7 +67,7 @@ public class HNSetWritable implements Writable {
      *            subset's position
      * @return <code>HNSubSet</code> object of at this position
      */
-    public final HNSubSetWritable get(int index) {
+    public final HNSubSet get(int index) {
         return set[index];
     }
 
@@ -77,21 +77,21 @@ public class HNSetWritable implements Writable {
      * @return a new <code>HNSetWritable</code> object with the same contents of the
      *         this <code>HNSetWritable</code> object
      */
-    public final HNSetWritable deepCopy() {
-        return new HNSetWritable(this);
+    public final HNSet deepCopy() {
+        return new HNSet(this);
     }
 
-    public HNSetWritable deepCopy(Map<Integer, Integer> oldNewIndexMap) {
+    public HNSet deepCopy(Map<Integer, Integer> oldNewIndexMap) {
         // TODO Auto-generated method stub
 
-        HNSubSetWritable[] newSet = new HNSubSetWritable[set.length];
+        HNSubSet[] newSet = new HNSubSet[set.length];
         int newSize = size;
 
         for (int i = 0; i < size; i++) {
             newSet[i] = set[i].deepCopy(oldNewIndexMap);
         }
 
-        return new HNSetWritable(newSet, newSize);
+        return new HNSet(newSet, newSize);
     }
 
     /**
@@ -102,7 +102,7 @@ public class HNSetWritable implements Writable {
      * @throws <code>RuntimeException</code> if subset to add is
      *         <code>null</code>
      */
-    public void add(HNSubSetWritable subset) {
+    public void add(HNSubSet subset) {
         if (subset == null) {
             throw new RuntimeException("don't add null, I don't like that!");
         }
@@ -115,7 +115,7 @@ public class HNSetWritable implements Writable {
 
             // increase capacity if needed
             if (size == set.length) {
-                HNSubSetWritable[] newSet = new HNSubSetWritable[set.length * 2];
+                HNSubSet[] newSet = new HNSubSet[set.length * 2];
 
                 System.arraycopy(set, 0, newSet, 0, set.length);
                 set = newSet;
@@ -137,11 +137,11 @@ public class HNSetWritable implements Writable {
      * @param setToInclude
      *            set contains the subsets to add
      */
-    public void addAll(HNSetWritable setToInclude) {
+    public void addAll(HNSet setToInclude) {
         if (set != null) {
 
             for (int i = 0; i < setToInclude.size(); i++) {
-                HNSubSetWritable subset = setToInclude.get(i);
+                HNSubSet subset = setToInclude.get(i);
                 // do binary search to find position of new element
                 int pos = binarySearch(subset);
 
@@ -150,7 +150,7 @@ public class HNSetWritable implements Writable {
 
                     // increase capacity if needed
                     if (size == set.length) {
-                        HNSubSetWritable[] newSet = new HNSubSetWritable[set.length * 2];
+                        HNSubSet[] newSet = new HNSubSet[set.length * 2];
 
                         System.arraycopy(set, 0, newSet, 0, set.length);
                         set = newSet;
@@ -177,7 +177,7 @@ public class HNSetWritable implements Writable {
      * @return <code>true</code> if this <code> HNSetWritable</code> object contains the
      *         given <code>subset</code>, <code>false</code> otherwise.
      */
-    public boolean contains(HNSubSetWritable subset) {
+    public boolean contains(HNSubSet subset) {
         return binarySearch(subset) >= 0;
     }
 
@@ -187,7 +187,7 @@ public class HNSetWritable implements Writable {
      * @param subset
      *            subset to be removed from this <code>HNSetWritable</code> object
      */
-    public void remove(HNSubSetWritable subset) {
+    public void remove(HNSubSet subset) {
         int pos = binarySearch(subset);
 
         if (pos >= 0) {
@@ -204,7 +204,7 @@ public class HNSetWritable implements Writable {
      *            set with subsets to be removed from this <code>HNSetWritable</code>
      *            object
      */
-    public void removeAll(HNSetWritable toRemove) {
+    public void removeAll(HNSet toRemove) {
         for (int i = 0; i < toRemove.size; i++) {
             remove(toRemove.get(i));
         }
@@ -236,7 +236,7 @@ public class HNSetWritable implements Writable {
      */
     @Override
     public boolean equals(Object o) {
-        HNSetWritable otherSet = (HNSetWritable) o;
+        HNSet otherSet = (HNSet) o;
 
         if ((otherSet == null) || (otherSet.size != size)) {
             return false;
@@ -251,13 +251,13 @@ public class HNSetWritable implements Writable {
     }
 
     // copied from the standard Arrays class, and adapted to our case:
-    private int binarySearch(HNSubSetWritable key) {
+    private int binarySearch(HNSubSet key) {
         int low = 0;
         int high = size - 1; // search only the added elements, not the extra capacity elements
 
         while (low <= high) {
             int mid = (low + high) >> 1;
-            HNSubSetWritable midVal = set[mid];
+            HNSubSet midVal = set[mid];
             int cmp = midVal.compareTo(key);
 
             if (cmp < 0) {
@@ -300,9 +300,9 @@ public class HNSetWritable implements Writable {
      *            set contains all the subset to be united
      * @return union set of all the subsets in the given <code>set</code>
      */
-    public static final HNSubSetWritable getUnionSet(HNSetWritable set) {
-        HNSubSetWritable unionSet = new HNSubSetWritable();
-        HNSubSetWritable subset = null;
+    public static final HNSubSet getUnionSet(HNSet set) {
+        HNSubSet unionSet = new HNSubSet();
+        HNSubSet subset = null;
 
         for (int i = 0; i < set.size(); i++) {
             subset = set.get(i);
@@ -325,10 +325,10 @@ public class HNSetWritable implements Writable {
      *            value to be removed from subsets
      * @return set where all the subsets do not contain <code>element</code>
      */
-    public static HNSetWritable removeElementFromSubsets(HNSetWritable set, int element) {
+    public static HNSet removeElementFromSubsets(HNSet set, int element) {
 
-        HNSetWritable returnSet = new HNSetWritable();
-        HNSubSetWritable subset = null;
+        HNSet returnSet = new HNSet();
+        HNSubSet subset = null;
 
         for (int iSet = 0; iSet < set.size(); iSet++) {
             subset = set.get(iSet);
@@ -354,6 +354,6 @@ public class HNSetWritable implements Writable {
         size = in.readInt();
         HNSubSetArrayWritable arrayWritable = new HNSubSetArrayWritable();
         arrayWritable.readFields(in);
-        set = (HNSubSetWritable[]) arrayWritable.get();
+        set = (HNSubSet[]) arrayWritable.get();
     }
 }

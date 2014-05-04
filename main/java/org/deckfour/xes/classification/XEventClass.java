@@ -54,7 +54,7 @@ import java.io.IOException;
  * @author Christian W. Guenther (christian@deckfour.org)
  *
  */
-public class XEventClassWritable implements WritableComparable<XEventClassWritable> {
+public class XEventClass implements WritableComparable<XEventClass> {
 
     /**
      * Unique index of class.
@@ -75,7 +75,7 @@ public class XEventClassWritable implements WritableComparable<XEventClassWritab
      * @param id Unique identification string of the class, i.e. its name.
      * @param index Unique index of this event class.
      */
-    public XEventClassWritable(String id, int index) {
+    public XEventClass(String id, int index) {
         this.id = id;
         this.index = index;
         this.size = 0;
@@ -128,8 +128,8 @@ public class XEventClassWritable implements WritableComparable<XEventClassWritab
     }
 
     public boolean equals(Object o) {
-        if(o instanceof XEventClassWritable) {
-            return this.id.equals(((XEventClassWritable)o).id);
+        if(o instanceof XEventClass) {
+            return this.id.equals(((XEventClass)o).id);
         } else {
             return false;
         }
@@ -146,7 +146,7 @@ public class XEventClassWritable implements WritableComparable<XEventClassWritab
     /* (non-Javadoc)
      * @see java.lang.Comparable#compareTo(java.lang.Object)
      */
-    public int compareTo(XEventClassWritable o) {
+    public int compareTo(XEventClass o) {
         return this.id.compareTo(o.getId());
     }
 

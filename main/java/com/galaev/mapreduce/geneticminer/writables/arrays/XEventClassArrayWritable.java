@@ -1,7 +1,7 @@
 package com.galaev.mapreduce.geneticminer.writables.arrays;
 
 import org.apache.hadoop.io.ArrayWritable;
-import org.deckfour.xes.classification.XEventClassWritable;
+import org.deckfour.xes.classification.XEventClass;
 
 /**
  * Created with IntelliJ IDEA.
@@ -11,6 +11,6 @@ import org.deckfour.xes.classification.XEventClassWritable;
  */
 public class XEventClassArrayWritable extends ArrayWritable {
     public XEventClassArrayWritable() {
-        super(XEventClassWritable.class);
+        super(XEventClass.class);
     }
 }

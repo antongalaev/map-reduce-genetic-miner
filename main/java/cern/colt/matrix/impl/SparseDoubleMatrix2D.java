@@ -9,7 +9,7 @@ It is provided "as is" without expressed or implied warranty.
 */
 
 import cern.colt.map.AbstractIntDoubleMap;
-import cern.colt.map.OpenIntDoubleHashMapWritable;
+import cern.colt.map.OpenIntDoubleHashMap;
 import cern.colt.matrix.DoubleMatrix1D;
 import cern.colt.matrix.DoubleMatrix2D;
 import org.apache.hadoop.io.Writable;
@@ -76,7 +76,7 @@ import java.io.IOException;
  @author wolfgang.hoschek@cern.ch
  @version 1.0, 09/24/99
  */
-public class SparseDoubleMatrix2DWritable extends DoubleMatrix2D implements Writable {
+public class SparseDoubleMatrix2D extends DoubleMatrix2D implements Writable {
     /*
      * The elements of the matrix.
      */
@@ -92,7 +92,7 @@ public class SparseDoubleMatrix2DWritable extends DoubleMatrix2D implements Writ
      * @param values The values to be filled into the new matrix.
      * @throws IllegalArgumentException if <tt>for any 1 &lt;= row &lt; values.length: values[row].length != values[row-1].length</tt>.
      */
-    public SparseDoubleMatrix2DWritable(double[][] values) {
+    public SparseDoubleMatrix2D(double[][] values) {
         this(values.length, values.length==0 ? 0: values[0].length);
         assign(values);
     }
@@ -103,7 +103,7 @@ public class SparseDoubleMatrix2DWritable extends DoubleMatrix2D implements Writ
      * @param columns the number of columns the matrix shall have.
      * @throws	IllegalArgumentException if <tt>rows<0 || columns<0 || (double)columns*rows > Integer.MAX_VALUE</tt>.
      */
-    public SparseDoubleMatrix2DWritable(int rows, int columns) {
+    public SparseDoubleMatrix2D(int rows, int columns) {
         this(rows,columns,rows*(columns/1000),0.2,0.5);
     }
     /**
@@ -120,9 +120,9 @@ public class SparseDoubleMatrix2DWritable extends DoubleMatrix2D implements Writ
      * @throws	IllegalArgumentException if <tt>initialCapacity < 0 || (minLoadFactor < 0.0 || minLoadFactor >= 1.0) || (maxLoadFactor <= 0.0 || maxLoadFactor >= 1.0) || (minLoadFactor >= maxLoadFactor)</tt>.
      * @throws	IllegalArgumentException if <tt>rows<0 || columns<0 || (double)columns*rows > Integer.MAX_VALUE</tt>.
      */
-    public SparseDoubleMatrix2DWritable(int rows, int columns, int initialCapacity, double minLoadFactor, double maxLoadFactor) {
+    public SparseDoubleMatrix2D(int rows, int columns, int initialCapacity, double minLoadFactor, double maxLoadFactor) {
         setUp(rows,columns);
-        this.elements = new OpenIntDoubleHashMapWritable(initialCapacity, minLoadFactor, maxLoadFactor);
+        this.elements = new OpenIntDoubleHashMap(initialCapacity, minLoadFactor, maxLoadFactor);
     }
     /**
      * Constructs a view with the given parameters.
@@ -135,7 +135,7 @@ public class SparseDoubleMatrix2DWritable extends DoubleMatrix2D implements Writ
      * @param columnStride the number of elements between two columns, i.e. <tt>index(i,j+1)-index(i,j)</tt>.
      * @throws	IllegalArgumentException if <tt>rows<0 || columns<0 || (double)columns*rows > Integer.MAX_VALUE</tt> or flip's are illegal.
      */
-    protected SparseDoubleMatrix2DWritable(int rows, int columns, AbstractIntDoubleMap elements, int rowZero, int columnZero, int rowStride, int columnStride) {
+    protected SparseDoubleMatrix2D(int rows, int columns, AbstractIntDoubleMap elements, int rowZero, int columnZero, int rowStride, int columnStride) {
         setUp(rows,columns,rowZero,columnZero,rowStride,columnStride);
         this.elements = elements;
         this.isNoView = false;
@@ -193,10 +193,10 @@ public class SparseDoubleMatrix2DWritable extends DoubleMatrix2D implements Writ
      */
     public DoubleMatrix2D assign(DoubleMatrix2D source) {
         // overriden for performance only
-        if (! (source instanceof SparseDoubleMatrix2DWritable)) {
+        if (! (source instanceof SparseDoubleMatrix2D)) {
             return super.assign(source);
         }
-        SparseDoubleMatrix2DWritable other = (SparseDoubleMatrix2DWritable) source;
+        SparseDoubleMatrix2D other = (SparseDoubleMatrix2D) source;
         if (other==this) return this; // nothing to do
         checkShape(other);
 
@@ -325,8 +325,8 @@ public class SparseDoubleMatrix2DWritable extends DoubleMatrix2D implements Writ
             SelectedSparseDoubleMatrix2D otherMatrix = (SelectedSparseDoubleMatrix2D) other;
             return this.elements==otherMatrix.elements;
         }
-        else if (other instanceof SparseDoubleMatrix2DWritable) {
-            SparseDoubleMatrix2DWritable otherMatrix = (SparseDoubleMatrix2DWritable) other;
+        else if (other instanceof SparseDoubleMatrix2D) {
+            SparseDoubleMatrix2D otherMatrix = (SparseDoubleMatrix2D) other;
             return this.elements==otherMatrix.elements;
         }
         return false;
@@ -353,7 +353,7 @@ public class SparseDoubleMatrix2DWritable extends DoubleMatrix2D implements Writ
      * @return  a new empty matrix of the same dynamic type.
      */
     public DoubleMatrix2D like(int rows, int columns) {
-        return new SparseDoubleMatrix2DWritable(rows, columns);
+        return new SparseDoubleMatrix2D(rows, columns);
     }
     /**
      * Construct and returns a new 1-d matrix <i>of the corresponding dynamic type</i>, entirelly independent of the receiver.
