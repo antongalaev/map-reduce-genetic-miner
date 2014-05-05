@@ -70,6 +70,13 @@ public class XEventClass implements WritableComparable<XEventClass> {
     protected int size;
 
     /**
+     * Default constructor for Hadoop serialization purposes.
+     */
+    public XEventClass() {
+
+    }
+
+    /**
      * Creates a new event class instance.
      *
      * @param id Unique identification string of the class, i.e. its name.

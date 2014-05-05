@@ -90,6 +90,13 @@ public class HeuristicsNetImpl implements WritableComparable<HeuristicsNet>, Heu
     public static final String FIELD_SEPARATOR = "/////////////////////";
 
     /**
+     * Default constructor for Hadoop serialization purposes.
+     */
+    public HeuristicsNetImpl() {
+        this(new ActivitiesMappingStructures());
+    }
+
+    /**
      * Builds a <code>HeuristicsNetImpl</code> objects based on a given
      * <code>ActivitiesMapping</code> object.
      *

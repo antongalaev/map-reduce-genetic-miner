@@ -82,6 +82,14 @@ public class SparseDoubleMatrix2D extends DoubleMatrix2D implements Writable {
      */
     protected AbstractIntDoubleMap elements;
     protected int dummy;
+
+    /**
+     * Default constructor for Hadoop serialization purposes.
+     */
+    public SparseDoubleMatrix2D() {
+        elements = new OpenIntDoubleHashMap();
+    }
+
     /**
      * Constructs a matrix with a copy of the given values.
      * <tt>values</tt> is required to have the form <tt>values[row][column]</tt>

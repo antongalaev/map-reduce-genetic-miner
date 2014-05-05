@@ -1,6 +1,5 @@
 package org.processmining.models.heuristics.impl;
 
-import com.galaev.mapreduce.geneticminer.writables.arrays.HNSubSetArrayWritable;
 import org.apache.hadoop.io.Writable;
 
 import java.io.DataInput;
@@ -344,16 +343,18 @@ public class HNSet implements Writable {
     @Override
     public void write(DataOutput out) throws IOException {
         out.writeInt(size);
-        HNSubSetArrayWritable arrayWritable = new HNSubSetArrayWritable();
-        arrayWritable.set(set);
-        arrayWritable.write(out);
+        for (int i = 0; i < size; ++i) {
+            set[i].write(out);
+        }
     }
 
     @Override
     public void readFields(DataInput in) throws IOException {
         size = in.readInt();
-        HNSubSetArrayWritable arrayWritable = new HNSubSetArrayWritable();
-        arrayWritable.readFields(in);
-        set = (HNSubSet[]) arrayWritable.get();
+        set = new HNSubSet[size * 2];
+        for (int i = 0; i < size; ++i) {
+            set[i] = new HNSubSet();
+            set[i].readFields(in);
+        }
     }
 }

@@ -35,6 +35,14 @@ public class ActivitiesMappingStructures implements Writable {
     private Map<XEventClass, HNSubSet> reverseActivitiesMapping; //Maps events to activities
 
     /**
+     * Default constructor for Hadoop serialization purposes.
+     */
+    public ActivitiesMappingStructures() {
+        xEventClasses = new XEventClasses();
+        reverseActivitiesMapping = new HashMap<>();
+    }
+
+    /**
      * Builds an <code>ActivitiesMappingStructuresWritable</code> object that contains a
      * single activity for each event in the provided <code>XEventClassWritable</code>
      * object.

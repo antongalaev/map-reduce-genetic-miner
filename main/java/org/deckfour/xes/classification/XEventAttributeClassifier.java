@@ -71,6 +71,14 @@ public class XEventAttributeClassifier implements XEventClassifier,
      */
     protected String name;
 
+
+    /**
+     * Default constructor for Hadoop serialization purposes.
+     */
+    public XEventAttributeClassifier() {
+
+    }
+
     /**
      * Creates a new instance, configured by the given attribute.
      *
@@ -211,6 +219,7 @@ public class XEventAttributeClassifier implements XEventClassifier,
         StringArrayWritable arrayWritable = new StringArrayWritable();
         arrayWritable.readFields(in);
         Text[] texts = (Text[]) arrayWritable.get();
+        keys = new String[texts.length];
         for (int i = 0; i < texts.length; ++i) {
             keys[i] = texts[i].toString();
         }

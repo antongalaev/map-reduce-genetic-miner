@@ -78,7 +78,7 @@ public class XEventClasses implements Writable {
      * @return A set of event classes, as an instance of this class.
      */
     public static synchronized XEventClasses deriveEventClasses(
-            XEventAttributeClassifier classifier, XLog log) {
+            XEventClassifier classifier, XLog log) {
         XEventClasses nClasses = new XEventClasses(classifier);
         nClasses.register(log);
         nClasses.harmonizeIndices();
@@ -94,14 +94,23 @@ public class XEventClasses implements Writable {
      */
     protected HashMap<String, XEventClass> classMap;
 
+
+    /**
+     * Default constructor for Hadoop serialization purposes.
+     */
+    public XEventClasses() {
+        classifier = new XEventAttributeClassifier();
+        classMap = new HashMap<>();
+    }
+
     /**
      * Creates a new instance, i.e. an empty set of event classes.
      *
      * @param classifier
      *            The classifier used for event comparison.
      */
-    public XEventClasses(XEventAttributeClassifier classifier) {
-        this.classifier = classifier;
+    public XEventClasses(XEventClassifier classifier) {
+        this.classifier = (XEventAttributeClassifier) classifier;
         this.classMap = new HashMap<>();
     }
 
