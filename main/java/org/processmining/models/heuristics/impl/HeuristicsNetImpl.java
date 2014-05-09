@@ -867,17 +867,27 @@ public class HeuristicsNetImpl implements WritableComparable<HeuristicsNet>, Heu
         // read activities actual firing
         IntArrayWritable arrayWritable = new IntArrayWritable();
         arrayWritable.readFields(in);
-        IntWritable[] intWritables = (IntWritable[]) arrayWritable.get();
-        activitiesActualFiring = new int[intWritables.length];
+        Writable[] writables = arrayWritable.get();
+        activitiesActualFiring = new int[writables.length];
         for (int i = 0; i < activitiesActualFiring.length; ++i) {
-            activitiesActualFiring[i] = intWritables[i].get();
+            IntWritable writable = (IntWritable) writables[i];
+            activitiesActualFiring[i] = writable.get();
         }
-        // read input and output sets
+        // read input sets
         HNSetArrayWritable hnSetArrayWritable = new HNSetArrayWritable();
         hnSetArrayWritable.readFields(in);
-        inputSets = (HNSet[]) hnSetArrayWritable.get();
+        writables = hnSetArrayWritable.get();
+        inputSets = new HNSet[writables.length];
+        for (int i = 0; i < inputSets.length; i++) {
+            inputSets[i] = (HNSet) writables[i];
+        }
+        // read output sets
         hnSetArrayWritable = new HNSetArrayWritable();
         hnSetArrayWritable.readFields(in);
-        outputSets = (HNSet[]) hnSetArrayWritable.get();
+        writables = hnSetArrayWritable.get();
+        outputSets = new HNSet[writables.length];
+        for (int i = 0; i < outputSets.length; i++) {
+            outputSets[i] = (HNSet) writables[i];
+        }
     }
 }

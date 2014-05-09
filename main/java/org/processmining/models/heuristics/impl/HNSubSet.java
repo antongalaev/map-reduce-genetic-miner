@@ -2,6 +2,7 @@ package org.processmining.models.heuristics.impl;
 
 import com.galaev.mapreduce.geneticminer.writables.arrays.IntArrayWritable;
 import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableComparable;
 
 import java.io.DataInput;
@@ -330,10 +331,11 @@ public class HNSubSet implements WritableComparable<HNSubSet> {
         hash = in.readInt();
         IntArrayWritable arrayWritable = new IntArrayWritable();
         arrayWritable.readFields(in);
-        IntWritable[] intWritables = (IntWritable[]) arrayWritable.get();
+        Writable[] intWritables = arrayWritable.get();
         subset = new int[intWritables.length];
         for (int i = 0; i < subset.length; ++i) {
-            subset[i] = intWritables[i].get();
+            IntWritable writable = (IntWritable) intWritables[i];
+            subset[i] = writable.get();
         }
     }
 }

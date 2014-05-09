@@ -40,6 +40,7 @@ package org.deckfour.xes.classification;
 
 import com.galaev.mapreduce.geneticminer.writables.arrays.StringArrayWritable;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableComparable;
 import org.deckfour.xes.model.XAttribute;
 import org.deckfour.xes.model.XEvent;
@@ -218,10 +219,11 @@ public class XEventAttributeClassifier implements XEventClassifier,
         name = in.readUTF();
         StringArrayWritable arrayWritable = new StringArrayWritable();
         arrayWritable.readFields(in);
-        Text[] texts = (Text[]) arrayWritable.get();
-        keys = new String[texts.length];
-        for (int i = 0; i < texts.length; ++i) {
-            keys[i] = texts[i].toString();
+        Writable[] writables = arrayWritable.get();
+        keys = new String[writables.length];
+        for (int i = 0; i < writables.length; ++i) {
+            Text writable = (Text) writables[i];
+            keys[i] = writable.toString();
         }
     }
 }

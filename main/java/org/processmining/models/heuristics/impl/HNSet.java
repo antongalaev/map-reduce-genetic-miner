@@ -114,15 +114,18 @@ public class HNSet implements Writable {
 
             // increase capacity if needed
             if (size == set.length) {
-                HNSubSet[] newSet = new HNSubSet[set.length * 2];
+                HNSubSet[] newSet = new HNSubSet[set.length * 3 / 2 + 1];
 
                 System.arraycopy(set, 0, newSet, 0, set.length);
                 set = newSet;
             }
-
-            // make space for the new element ...
-            System.arraycopy(set, pos, set, pos + 1, size - pos);
-
+            try {
+                // make space for the new element ...
+                System.arraycopy(set, pos, set, pos + 1, size - pos);
+            } catch (Exception e) {
+                e.printStackTrace();
+                System.out.println(String.format("pos = %d , size = %d", pos, size));
+            }
             // ... and insert it
             set[pos] = subset;
             size++;

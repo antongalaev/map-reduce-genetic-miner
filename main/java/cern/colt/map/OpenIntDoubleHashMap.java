@@ -636,27 +636,29 @@ public class OpenIntDoubleHashMap extends AbstractIntDoubleMap implements Writab
         // read table
         IntArrayWritable tableWritable = new IntArrayWritable();
         tableWritable.readFields(in);
-        IntWritable[] intWritables = (IntWritable[]) tableWritable.get();
-        table = new int[intWritables.length];
+        Writable[] writables = tableWritable.get();
+        table = new int[writables.length];
         for (int i = 0; i < table.length; ++i) {
-            table[i] = intWritables[i].get();
+            IntWritable writable = (IntWritable) writables[i];
+            table[i] = writable.get();
         }
         // read values
         DoubleArrayWritable valuesWritable = new DoubleArrayWritable();
         valuesWritable.readFields(in);
-        DoubleWritable[] doubleWritables = (DoubleWritable[]) valuesWritable.get();
-        values = new double[doubleWritables.length];
+        writables = valuesWritable.get();
+        values = new double[writables.length];
         for (int i = 0; i < values.length; ++i) {
-            values[i] = doubleWritables[i].get();
+            DoubleWritable writable = (DoubleWritable) writables[i];
+            values[i] = writable.get();
         }
         // read state
         ByteArrayWritable stateWritable = new ByteArrayWritable();
         stateWritable.readFields(in);
-        ByteWritable[] byteWritables = (ByteWritable[]) stateWritable.get();
-        state = new byte[byteWritables.length];
+        writables = stateWritable.get();
+        state = new byte[writables.length];
         for (int i = 0; i < state.length; ++i) {
-            state[i] = byteWritables[i].get();
+            ByteWritable writable = (ByteWritable) writables[i];
+            state[i] = writable.get();
         }
-        
     }
 }

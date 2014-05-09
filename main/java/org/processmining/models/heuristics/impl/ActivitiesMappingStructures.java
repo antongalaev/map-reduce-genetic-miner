@@ -39,6 +39,7 @@ public class ActivitiesMappingStructures implements Writable {
      */
     public ActivitiesMappingStructures() {
         xEventClasses = new XEventClasses();
+        activitiesMapping = new XEventClass[0];
         reverseActivitiesMapping = new HashMap<>();
     }
 
@@ -310,7 +311,11 @@ public class ActivitiesMappingStructures implements Writable {
         // read activities mapping
         XEventClassArrayWritable arrayWritable = new XEventClassArrayWritable();
         arrayWritable.readFields(in);
-        activitiesMapping = (XEventClass[]) arrayWritable.get();
+        Writable[] writables =  arrayWritable.get();
+        activitiesMapping = new XEventClass[writables.length];
+        for (int i = 0; i < activitiesMapping.length; i++) {
+            activitiesMapping[i] = (XEventClass) writables[i];
+        }
         // read reverse activities mapping
         MapWritable map = new MapWritable();
         map.readFields(in);
