@@ -5,6 +5,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.IOUtils;
+import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.deckfour.xes.info.XLogInfo;
 import org.junit.Test;
@@ -39,9 +40,34 @@ public class MinerDriverTest {
     }
 
     @Test
-    public void testReadInitialPopulation() throws Exception {
-        MinerDriver.readPopulation(MinerDriver.OUTPUT_PATH + "1/part-00000");
+    public void testReadPopulation() throws Exception {
+        Configuration conf = new Configuration();
+        FileSystem fs = FileSystem.get(conf);
+        Path path = new Path(MinerDriver.INPUT_PATH);
+        SequenceFile.Reader reader = null;
+        LongWritable key = new LongWritable();
+        HeuristicsNetImpl value = new HeuristicsNetImpl();
+        try {
+            reader = new SequenceFile.Reader(fs, path, conf);
+            while (reader.next(key, value)) {
+                System.out.println("Key: " + key.get() + " fitness: " + value.getFitness());
+                value = new HeuristicsNetImpl();
+            }
+        } finally {
+            IOUtils.closeStream(reader);
+        }
     }
+
+
+    @Test
+    public void testReadResults() throws Exception {
+        for (int i = 0; i < 10; i++) {
+            MinerDriver.readPopulation(MinerDriver.OUTPUT_PATH + i + "/part-00000");
+        }
+    }
+
+
+
     GeneticMinerSettings settings = new GeneticMinerSettings();
     private double[] bestFitness;
 

@@ -1,6 +1,6 @@
 package com.galaev.mapreduce.geneticminer;
 
-import org.apache.hadoop.io.DoubleWritable;
+import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
@@ -19,9 +19,9 @@ import java.io.IOException;
  * Time: 23:16
  */
 public class MinerMapper extends MapReduceBase
-        implements Mapper<HeuristicsNetImpl, DoubleWritable, HeuristicsNetImpl, DoubleWritable> {
+        implements Mapper<LongWritable, HeuristicsNetImpl, LongWritable, HeuristicsNetImpl> {
 
-    Logger logger = LoggerFactory.getLogger(MinerMapper.class);
+    private static final Logger logger = LoggerFactory.getLogger(MinerMapper.class);
     XLogInfo logInfo = null;
 
     {
@@ -34,9 +34,9 @@ public class MinerMapper extends MapReduceBase
     }
 
     @Override
-    public void map(HeuristicsNetImpl key, DoubleWritable value, OutputCollector<HeuristicsNetImpl, DoubleWritable> output, Reporter reporter) throws IOException {
+    public void map(LongWritable key, HeuristicsNetImpl value, OutputCollector<LongWritable, HeuristicsNetImpl> output, Reporter reporter) throws IOException {
         SingleFitness fitness = new SingleFitness(logInfo);
-        HeuristicsNetImpl individual = (HeuristicsNetImpl) fitness.calculate(key);
-        output.collect(individual, new DoubleWritable(individual.getFitness()));
+        HeuristicsNetImpl individual = (HeuristicsNetImpl) fitness.calculate(value);
+        output.collect(key, individual);
     }
 }

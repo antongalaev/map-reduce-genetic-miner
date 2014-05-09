@@ -1,6 +1,6 @@
 package com.galaev.mapreduce.geneticminer;
 
-import org.apache.hadoop.io.DoubleWritable;
+import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
@@ -29,9 +29,10 @@ import java.util.Random;
  * Date: 04/04/2014
  * Time: 23:59
  */
-public class MinerReducer extends MapReduceBase implements Reducer<HeuristicsNetImpl, DoubleWritable, HeuristicsNetImpl, DoubleWritable> {
+public class MinerReducer extends MapReduceBase
+        implements Reducer<LongWritable, HeuristicsNetImpl, LongWritable, HeuristicsNetImpl> {
 
-    Logger logger = LoggerFactory.getLogger(MinerReducer.class);
+    private static final Logger logger = LoggerFactory.getLogger(MinerReducer.class);
 
     GeneticMinerSettings settings = new GeneticMinerSettings();
     Random generator = new Random(settings.getSeed());
@@ -45,23 +46,28 @@ public class MinerReducer extends MapReduceBase implements Reducer<HeuristicsNet
             .getCrossoverRate(), settings.getMutationRate(), settings.getElitismRate(), crossover, mutation);
 
     HeuristicsNetImpl[] window = new HeuristicsNetImpl[10];
+    long[] keys = new long[10];
 
     int counter = 0;
 
     {
         logger.info("In reducer " + this.toString());
     }
-    @Override
-    public void reduce(HeuristicsNetImpl key, Iterator<DoubleWritable> values, OutputCollector<HeuristicsNetImpl, DoubleWritable> output, Reporter reporter) throws IOException {
 
+    @Override
+    public void reduce(LongWritable key, Iterator<HeuristicsNetImpl> values, OutputCollector<LongWritable, HeuristicsNetImpl> output, Reporter reporter) throws IOException {
         if (counter < window.length) {
-            window[counter] = key;
+            keys[counter] = key.get();
+            window[counter] = (HeuristicsNetImpl) values.next().copy();
             ++ counter;
-        } else {
+        }
+        if (counter == window.length) {
+            logger.info("WRITING A WINDOW");
             counter = 0;
             HeuristicsNet[] result = buildNextPopulation.build(window);
-            for (HeuristicsNet individual : result) {
-                output.collect((HeuristicsNetImpl) individual, new DoubleWritable(individual.getFitness()));
+            for (int i = 0; i < window.length; i++) {
+                output.collect(new LongWritable(keys[i]), (HeuristicsNetImpl) result[i]);
+                logger.info("Key: " + keys[i] + " fitness: " + result[i].getFitness());
             }
         }
     }
