@@ -34,6 +34,7 @@ public class HeuristicsNetImpl implements WritableComparable<HeuristicsNet>, Heu
     private HNSubSet endActivities; //the HeuristicsNet can have multiple end activities
     private double fitness; //fitness of the HeuristicsNet
     private int size; //number of activities in the HeuristicsNet
+    private int key; // individual's number in the population
     private int[] activitiesActualFiring; //Keeps track of how often activities have been executed during the log replay
     private DoubleMatrix2D arcUsage; //Keeps track of how often arcs have been used during the log replay
 
@@ -557,12 +558,16 @@ public class HeuristicsNetImpl implements WritableComparable<HeuristicsNet>, Heu
             copy.setOutputSet(i, outputSets[i].deepCopy());
         }
 
+
         //copying the fitness...
         copy.setFitness(fitness);
 
         //copying the start/end tasks...
         copy.setStartActivities(startActivities);
         copy.setEndActivities(endActivities);
+
+        // copying the key
+        ((HeuristicsNetImpl) copy).setKey(key);
 
         //making deep copy of the "duplicates actual firing"...
         int[] dacCopy = new int[activitiesActualFiring.length];
@@ -827,6 +832,7 @@ public class HeuristicsNetImpl implements WritableComparable<HeuristicsNet>, Heu
     public void write(DataOutput out) throws IOException {
         // write primitives
         out.writeInt(size);
+        out.writeInt(key);
         out.writeDouble(fitness);
         // write start/end HNSubSets
         startActivities.write(out);
@@ -856,6 +862,7 @@ public class HeuristicsNetImpl implements WritableComparable<HeuristicsNet>, Heu
     public void readFields(DataInput in) throws IOException {
         // read primitives
         size = in.readInt();
+        key = in.readInt();
         fitness = in.readDouble();
         // read start/end HNSubSets
         startActivities.readFields(in);
@@ -889,5 +896,13 @@ public class HeuristicsNetImpl implements WritableComparable<HeuristicsNet>, Heu
         for (int i = 0; i < outputSets.length; i++) {
             outputSets[i] = (HNSet) writables[i];
         }
+    }
+
+    public int getKey() {
+        return key;
+    }
+
+    public void setKey(int key) {
+        this.key = key;
     }
 }

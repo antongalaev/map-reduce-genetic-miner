@@ -4,7 +4,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IOUtils;
-import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.mapred.*;
 import org.deckfour.xes.in.XesXmlParser;
@@ -13,15 +13,14 @@ import org.deckfour.xes.info.XLogInfoFactory;
 import org.deckfour.xes.model.XLog;
 import org.processmining.models.heuristics.HeuristicsNet;
 import org.processmining.models.heuristics.impl.HeuristicsNetImpl;
-import org.processmining.plugins.heuristicsnet.miner.genetic.fitness.Fitness;
-import org.processmining.plugins.heuristicsnet.miner.genetic.fitness.FitnessFactory;
 import org.processmining.plugins.heuristicsnet.miner.genetic.miner.settings.GeneticMinerSettings;
 import org.processmining.plugins.heuristicsnet.miner.genetic.population.InitialPopulationFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.util.*;
+import java.util.List;
+import java.util.Random;
 
 /**
  * Created with IntelliJ IDEA.
@@ -66,7 +65,7 @@ public class MinerDriver {
         conf.setPartitionerClass(MinerPartitioner.class);
         conf.setMapperClass(MinerMapper.class);
         conf.setReducerClass(MinerReducer.class);
-        conf.setOutputKeyClass(LongWritable.class);
+        conf.setOutputKeyClass(IntWritable.class);
         conf.setOutputValueClass(HeuristicsNetImpl.class);
         return conf;
     }
@@ -86,18 +85,19 @@ public class MinerDriver {
 
         XLogInfo logInfo = getLogInfo();
         GeneticMinerSettings settings = new GeneticMinerSettings();
-        settings.setPopulationSize(1000);
+        settings.setPopulationSize(10000);
         Random generator = new Random(settings.getSeed());
         HeuristicsNet[] population = new HeuristicsNet[settings.getPopulationSize()];
         population = InitialPopulationFactory.getPopulation(settings.getInitialPopulationType(), generator,
                 logInfo, settings.getPower()).build(population);
 
-        LongWritable key = new LongWritable();
+        IntWritable key = new IntWritable();
         SequenceFile.Writer writer = null;
         try {
-            writer = SequenceFile.createWriter(fs, conf, path, LongWritable.class, HeuristicsNetImpl.class);
+            writer = SequenceFile.createWriter(fs, conf, path, IntWritable.class, HeuristicsNetImpl.class);
             for (int i = 0; i < population.length; ++i) {
                 key.set(i);
+                ((HeuristicsNetImpl) population[i]).setKey(i);
                 writer.append(key, population[i]);
             }
         } finally {
@@ -106,54 +106,4 @@ public class MinerDriver {
     }
 
 
-
-    public static void readPopulation(String input) throws Exception {
-        System.out.println("Reading : " + input);
-
-        Configuration conf = new Configuration();
-        FileSystem fs = FileSystem.get(conf);
-        Path path = new Path(input);
-
-
-        List<HeuristicsNetImpl> result = new ArrayList<>();
-
-        LongWritable key = new LongWritable();
-        HeuristicsNetImpl net = new HeuristicsNetImpl();
-        HeuristicsNetImpl prev = new HeuristicsNetImpl();
-        SequenceFile.Reader reader = null;
-        try {
-            reader = new SequenceFile.Reader(fs, path, conf);
-            while (reader.next(key, net)) {
-                result.add(net);
-                System.out.print(net.getFitness() == prev.getFitness() ? "1" : "0");
-                prev = net;
-                net = new HeuristicsNetImpl();
-            }
-
-        } finally {
-            IOUtils.closeStream(reader);
-        }
-
-        System.out.println("\n Initial :" + Collections.min(result).getFitness() + " ----" + result.size() + "---- "
-                + Collections.max(result).getFitness());
-
-        XLogInfo logInfo = getLogInfo();
-        Fitness fitness = FitnessFactory.getFitness(3, logInfo, FitnessFactory.ALL_FITNESS_PARAMETERS);
-        HeuristicsNetImpl[] population = (HeuristicsNetImpl[]) fitness.calculate(result.toArray(new HeuristicsNetImpl[result.size()]));
-        System.out.println("\n Continuous new " + Collections.min(Arrays.asList(population)).getFitness() + " ----" + result.size() + "---- "
-                + Collections.max(Arrays.asList(population)).getFitness());
-        //printFitness(population);
-
-        fitness = FitnessFactory.getFitness(4, logInfo, FitnessFactory.ALL_FITNESS_PARAMETERS);
-        population = (HeuristicsNetImpl[]) fitness.calculate(population);
-        System.out.println("\n Punishment new " + Collections.min(Arrays.asList(population)).getFitness() + " ----" + result.size() + "---- "
-                + Collections.max(Arrays.asList(population)).getFitness());
-        //printFitness(population);
-    }
-
-    private static void printFitness(HeuristicsNetImpl[] population) {
-        for (HeuristicsNetImpl aPopulation : population) {
-            System.out.println(aPopulation.getFitness());
-        }
-    }
 }

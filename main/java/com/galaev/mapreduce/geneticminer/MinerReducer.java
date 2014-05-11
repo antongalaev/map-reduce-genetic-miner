@@ -1,6 +1,6 @@
 package com.galaev.mapreduce.geneticminer;
 
-import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.mapred.MapReduceBase;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.apache.hadoop.mapred.Reducer;
@@ -20,7 +20,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Random;
 
 /**
@@ -30,7 +32,7 @@ import java.util.Random;
  * Time: 23:59
  */
 public class MinerReducer extends MapReduceBase
-        implements Reducer<LongWritable, HeuristicsNetImpl, LongWritable, HeuristicsNetImpl> {
+        implements Reducer<IntWritable, HeuristicsNetImpl, IntWritable, HeuristicsNetImpl> {
 
     private static final Logger logger = LoggerFactory.getLogger(MinerReducer.class);
 
@@ -45,30 +47,28 @@ public class MinerReducer extends MapReduceBase
     BuildPopulation buildNextPopulation = NextPopulationFactory.getPopulation(selectionMethod, generator, settings
             .getCrossoverRate(), settings.getMutationRate(), settings.getElitismRate(), crossover, mutation);
 
-    HeuristicsNetImpl[] window = new HeuristicsNetImpl[10];
-    long[] keys = new long[10];
-
-    int counter = 0;
-
     {
         logger.info("In reducer " + this.toString());
     }
 
     @Override
-    public void reduce(LongWritable key, Iterator<HeuristicsNetImpl> values, OutputCollector<LongWritable, HeuristicsNetImpl> output, Reporter reporter) throws IOException {
-        if (counter < window.length) {
-            keys[counter] = key.get();
-            window[counter] = (HeuristicsNetImpl) values.next().copy();
-            ++ counter;
+    public void reduce(IntWritable key, Iterator<HeuristicsNetImpl> values, OutputCollector<IntWritable, HeuristicsNetImpl> output, Reporter reporter) throws IOException {
+        // collect the input into array
+        List<HeuristicsNet> netsList = new ArrayList<>();
+        while (values.hasNext()) {
+           netsList.add(values.next().copy());
         }
-        if (counter == window.length) {
-            logger.info("WRITING A WINDOW");
-            counter = 0;
-            HeuristicsNet[] result = buildNextPopulation.build(window);
-            for (int i = 0; i < window.length; i++) {
-                output.collect(new LongWritable(keys[i]), (HeuristicsNetImpl) result[i]);
-                logger.info("Key: " + keys[i] + " fitness: " + result[i].getFitness());
-            }
+        HeuristicsNet[] nets = netsList.toArray(new HeuristicsNet[netsList.size()]);
+
+        // build next population
+        HeuristicsNet[] result = buildNextPopulation.build(nets);
+
+        // write it to the output with the right keys
+        for (HeuristicsNet heuristicsNet : result) {
+            HeuristicsNetImpl net = (HeuristicsNetImpl) heuristicsNet;
+            output.collect(new IntWritable(net.getKey()), net);
+            //logger.info("Key: " + net.getKey() + " fitness: " + net.getFitness());
         }
+        logger.info("Population part #" + key + " is reduced. Size = " + nets.length);
     }
 }

@@ -3,10 +3,7 @@ package com.galaev.mapreduce.geneticminer;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.DoubleWritable;
-import org.apache.hadoop.io.IOUtils;
-import org.apache.hadoop.io.LongWritable;
-import org.apache.hadoop.io.SequenceFile;
+import org.apache.hadoop.io.*;
 import org.deckfour.xes.info.XLogInfo;
 import org.junit.Test;
 import org.processmining.models.heuristics.HeuristicsNet;
@@ -25,14 +22,57 @@ import org.processmining.plugins.heuristicsnet.miner.genetic.selection.Selection
 import org.processmining.plugins.heuristicsnet.miner.genetic.selection.SelectionMethodFactory;
 import org.processmining.plugins.heuristicsnet.miner.genetic.util.MethodsOverHeuristicsNets;
 
-import java.util.Arrays;
-import java.util.Random;
+import java.util.*;
 
 import static junit.framework.Assert.assertEquals;
 
 public class MinerDriverTest {
 
     public static final String INPUT_PATH = "population/final/part-00000";
+
+    public static void readPopulation(String input) throws Exception {
+        System.out.println("Reading : " + input);
+
+        Configuration conf = new Configuration();
+        FileSystem fs = FileSystem.get(conf);
+        Path path = new Path(input);
+
+
+        List<HeuristicsNetImpl> result = new ArrayList<>();
+
+        IntWritable key = new IntWritable();
+        HeuristicsNetImpl net = new HeuristicsNetImpl();
+        SequenceFile.Reader reader = null;
+        try {
+            reader = new SequenceFile.Reader(fs, path, conf);
+            while (reader.next(key, net)) {
+                result.add(net);
+                net = new HeuristicsNetImpl();
+            }
+
+        } finally {
+            IOUtils.closeStream(reader);
+        }
+
+        XLogInfo logInfo = MinerDriver.getLogInfo();
+        Fitness fitness = FitnessFactory.getFitness(3, logInfo, FitnessFactory.ALL_FITNESS_PARAMETERS);
+        HeuristicsNetImpl[] population = (HeuristicsNetImpl[]) fitness.calculate(result.toArray(new HeuristicsNetImpl[result.size()]));
+        System.out.println("\n Continuous new " + Collections.min(Arrays.asList(population)).getFitness() + " ----" + result.size() + "---- "
+                + Collections.max(Arrays.asList(population)).getFitness());
+        //printFitness(population);
+
+        fitness = FitnessFactory.getFitness(4, logInfo, FitnessFactory.ALL_FITNESS_PARAMETERS);
+        population = (HeuristicsNetImpl[]) fitness.calculate(population);
+        System.out.println("\n Punishment new " + Collections.min(Arrays.asList(population)).getFitness() + " ----" + result.size() + "---- "
+                + Collections.max(Arrays.asList(population)).getFitness());
+        //printFitness(population);
+    }
+
+    private static void printFitness(HeuristicsNetImpl[] population) {
+        for (HeuristicsNetImpl aPopulation : population) {
+            System.out.println(aPopulation.getFitness());
+        }
+    }
 
     @Test
     public void testWriteInitialPopulation() throws Exception {
@@ -62,7 +102,7 @@ public class MinerDriverTest {
     @Test
     public void testReadResults() throws Exception {
         for (int i = 0; i < 10; i++) {
-            MinerDriver.readPopulation(MinerDriver.OUTPUT_PATH + i + "/part-00000");
+            readPopulation(MinerDriver.OUTPUT_PATH + i + "/part-00000");
         }
     }
 
