@@ -1,4 +1,4 @@
-package com.galaev.mapreduce.geneticminer.writables.arrays;
+package com.galaev.genminer.mapred.writables.arrays;
 
 import org.apache.hadoop.io.ArrayWritable;
 import org.apache.hadoop.io.DoubleWritable;

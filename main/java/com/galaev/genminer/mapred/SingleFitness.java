@@ -1,4 +1,4 @@
-package com.galaev.mapreduce.geneticminer;
+package com.galaev.genminer.mapred;
 
 import org.deckfour.xes.info.XLogInfo;
 import org.deckfour.xes.model.XTrace;

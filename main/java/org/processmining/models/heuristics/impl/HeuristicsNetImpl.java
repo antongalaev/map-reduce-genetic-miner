@@ -2,8 +2,8 @@ package org.processmining.models.heuristics.impl;
 
 import cern.colt.matrix.DoubleFactory2D;
 import cern.colt.matrix.DoubleMatrix2D;
-import com.galaev.mapreduce.geneticminer.writables.arrays.HNSetArrayWritable;
-import com.galaev.mapreduce.geneticminer.writables.arrays.IntArrayWritable;
+import com.galaev.genminer.mapred.writables.arrays.HNSetArrayWritable;
+import com.galaev.genminer.mapred.writables.arrays.IntArrayWritable;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableComparable;

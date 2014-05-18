@@ -1,7 +1,6 @@
 package org.processmining.models.heuristics.impl;
 
-import com.galaev.mapreduce.geneticminer.writables.arrays.XEventClassArrayWritable;
-import org.apache.hadoop.io.MapWritable;
+import com.galaev.genminer.mapred.writables.arrays.XEventClassArrayWritable;
 import org.apache.hadoop.io.Writable;
 import org.deckfour.xes.classification.XEventClass;
 import org.deckfour.xes.classification.XEventClasses;
@@ -10,8 +9,6 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.util.*;
-
-import static java.util.Map.Entry;
 
 /**
  * Aids the creation of <code>HeuristicsNets</code> objects. In short, this
@@ -300,9 +297,12 @@ public class ActivitiesMappingStructures implements Writable {
         arrayWritable.set(activitiesMapping);
         arrayWritable.write(out);
         // write reverse activities mapping
-        MapWritable map = new MapWritable();
-        map.putAll(reverseActivitiesMapping);
-        map.write(out);
+        out.writeInt(reverseActivitiesMapping.size());
+        for (XEventClass key : reverseActivitiesMapping.keySet()) {
+            key.write(out);
+            HNSubSet value = reverseActivitiesMapping.get(key);
+            value.write(out);
+        }
     }
 
     @Override
@@ -317,11 +317,12 @@ public class ActivitiesMappingStructures implements Writable {
             activitiesMapping[i] = (XEventClass) writables[i];
         }
         // read reverse activities mapping
-        MapWritable map = new MapWritable();
-        map.readFields(in);
-        for (Entry<Writable, Writable> entry : map.entrySet()) {
-            XEventClass key = (XEventClass) entry.getKey();
-            HNSubSet value = (HNSubSet) entry.getValue();
+        int size = in.readInt();
+        for (int i = 0; i < size; i++) {
+            XEventClass key = new XEventClass();
+            key.readFields(in);
+            HNSubSet value = new HNSubSet();
+            value.readFields(in);
             reverseActivitiesMapping.put(key, value);
         }
     }

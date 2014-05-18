@@ -1,4 +1,4 @@
-package com.galaev.mapreduce.geneticminer;
+package com.galaev.genminer.mapred;
 
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.mapred.JobConf;

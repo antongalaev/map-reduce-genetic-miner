@@ -1,4 +1,4 @@
-package com.galaev.mapreduce.geneticminer;
+package com.galaev.genminer.mapred;
 
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.mapred.MapReduceBase;
@@ -69,6 +69,6 @@ public class MinerReducer extends MapReduceBase
             output.collect(new IntWritable(net.getKey()), net);
             //logger.info("Key: " + net.getKey() + " fitness: " + net.getFitness());
         }
-        logger.info("Population part #" + key + " is reduced. Size = " + nets.length);
+        //logger.info("Population part #" + key + " is reduced. Size = " + nets.length);
     }
 }

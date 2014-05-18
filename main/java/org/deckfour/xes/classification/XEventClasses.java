@@ -38,8 +38,6 @@
  */
 package org.deckfour.xes.classification;
 
-import org.apache.hadoop.io.MapWritable;
-import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
 import org.deckfour.xes.model.XEvent;
 import org.deckfour.xes.model.XLog;
@@ -48,9 +46,10 @@ import org.deckfour.xes.model.XTrace;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import java.util.*;
-
-import static java.util.Map.Entry;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 
 /**
  * A set of event classes. For any log, this class can be used to impose a
@@ -278,21 +277,22 @@ public class XEventClasses implements Writable {
     @Override
     public void write(DataOutput out) throws IOException {
         classifier.write(out);
-        MapWritable map = new MapWritable();
-        for (Entry<String, XEventClass> entry : classMap.entrySet()) {
-            map.put(new Text(entry.getKey()),entry.getValue());
+        out.writeInt(classMap.size());
+        for (String key : classMap.keySet()) {
+            out.writeUTF(key);
+            XEventClass value = classMap.get(key);
+            value.write(out);
         }
-        map.write(out);
     }
 
     @Override
     public void readFields(DataInput in) throws IOException {
         classifier.readFields(in);
-        MapWritable map = new MapWritable();
-        map.readFields(in);
-        for (Entry<Writable, Writable> entry : map.entrySet()) {
-            String key = entry.getKey().toString();
-            XEventClass value = (XEventClass) entry.getValue();
+        int size = in.readInt();
+        for (int i = 0; i < size; i++) {
+            String key = in.readUTF();
+            XEventClass value = new XEventClass();
+            value.readFields(in);
             classMap.put(key, value);
         }
     }

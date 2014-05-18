@@ -1,13 +1,22 @@
-package com.galaev.mapreduce.geneticminer;
+package com.galaev.genminer.mapred;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.*;
+import org.apache.hadoop.io.DoubleWritable;
+import org.apache.hadoop.io.IOUtils;
+import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.SequenceFile;
+import org.deckfour.xes.in.XesXmlParser;
 import org.deckfour.xes.info.XLogInfo;
+import org.deckfour.xes.info.XLogInfoFactory;
+import org.deckfour.xes.model.XLog;
+import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.processmining.models.heuristics.HeuristicsNet;
 import org.processmining.models.heuristics.impl.HeuristicsNetImpl;
+import org.processmining.plugins.heuristicsnet.array.visualization.HeuristicsMinerVisualizationPanel;
 import org.processmining.plugins.heuristicsnet.miner.genetic.fitness.Fitness;
 import org.processmining.plugins.heuristicsnet.miner.genetic.fitness.FitnessFactory;
 import org.processmining.plugins.heuristicsnet.miner.genetic.geneticoperations.Crossover;
@@ -22,15 +31,50 @@ import org.processmining.plugins.heuristicsnet.miner.genetic.selection.Selection
 import org.processmining.plugins.heuristicsnet.miner.genetic.selection.SelectionMethodFactory;
 import org.processmining.plugins.heuristicsnet.miner.genetic.util.MethodsOverHeuristicsNets;
 
+import javax.swing.*;
+import java.io.File;
 import java.util.*;
 
 import static junit.framework.Assert.assertEquals;
 
+
+@Ignore
 public class MinerDriverTest {
 
     public static final String INPUT_PATH = "population/final/part-00000";
+    private static XLogInfo logInfo;
 
-    public static void readPopulation(String input) throws Exception {
+
+    @BeforeClass
+    public static void setUp() throws Exception {
+        XesXmlParser parser = new XesXmlParser();
+        //List<XLog> logs = parser.parse(new File("/Users/anton/Downloads/Chapter_8/reviewing.xes"));
+        List<XLog> logs = parser.parse(new File("logs/example1.xes"));
+        XLog log = logs.get(0);
+        logInfo = XLogInfoFactory.createLogInfo(log);
+    }
+
+
+    @Test
+    public void visualizeResult() throws Exception {
+        List<HeuristicsNetImpl> result = new ArrayList<>();
+        for (int i = 0; i < 4; i++) {
+            // readPopulation(MinerDriver.POPULATIONS_PATH + i + "/part-00000");
+            result.addAll(Arrays.asList(readPopulation("/Users/anton/gen10/part-0000" + i)));
+        }
+        final HeuristicsMinerVisualizationPanel panel = new HeuristicsMinerVisualizationPanel(null,
+                result.toArray(new HeuristicsNet[result.size()]));
+
+                new JFrame() {{
+                    setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+                    setTitle("Heuristics Net Visualization");
+                    setSize(400, 300);
+                    add(panel);
+                }}.setVisible(true);
+        Thread.sleep(120000);
+    }
+
+    public static HeuristicsNetImpl[] readPopulation(String input) throws Exception {
         System.out.println("Reading : " + input);
 
         Configuration conf = new Configuration();
@@ -54,18 +98,19 @@ public class MinerDriverTest {
             IOUtils.closeStream(reader);
         }
 
-        XLogInfo logInfo = MinerDriver.getLogInfo();
         Fitness fitness = FitnessFactory.getFitness(3, logInfo, FitnessFactory.ALL_FITNESS_PARAMETERS);
         HeuristicsNetImpl[] population = (HeuristicsNetImpl[]) fitness.calculate(result.toArray(new HeuristicsNetImpl[result.size()]));
-        System.out.println("\n Continuous new " + Collections.min(Arrays.asList(population)).getFitness() + " ----" + result.size() + "---- "
-                + Collections.max(Arrays.asList(population)).getFitness());
+        System.out.println("\n Continuous new " + Collections.min(Arrays.asList(population)).getFitness() +
+                " - " + Collections.max(Arrays.asList(population)).getFitness());
         //printFitness(population);
+//
+//        fitness = FitnessFactory.getFitness(4, logInfo, FitnessFactory.ALL_FITNESS_PARAMETERS);
+//        population = (HeuristicsNetImpl[]) fitness.calculate(population);
+//        System.out.println("\n Punishment new "  + Collections.min(Arrays.asList(population)).getFitness() +
+//                " - "  + Collections.max(Arrays.asList(population)).getFitness());
+//        //printFitness(population);
 
-        fitness = FitnessFactory.getFitness(4, logInfo, FitnessFactory.ALL_FITNESS_PARAMETERS);
-        population = (HeuristicsNetImpl[]) fitness.calculate(population);
-        System.out.println("\n Punishment new " + Collections.min(Arrays.asList(population)).getFitness() + " ----" + result.size() + "---- "
-                + Collections.max(Arrays.asList(population)).getFitness());
-        //printFitness(population);
+        return population;
     }
 
     private static void printFitness(HeuristicsNetImpl[] population) {
@@ -74,35 +119,12 @@ public class MinerDriverTest {
         }
     }
 
-    @Test
-    public void testWriteInitialPopulation() throws Exception {
-        MinerDriver.writeInitialPopulation();
-    }
-
-    @Test
-    public void testReadPopulation() throws Exception {
-        Configuration conf = new Configuration();
-        FileSystem fs = FileSystem.get(conf);
-        Path path = new Path(MinerDriver.INPUT_PATH);
-        SequenceFile.Reader reader = null;
-        LongWritable key = new LongWritable();
-        HeuristicsNetImpl value = new HeuristicsNetImpl();
-        try {
-            reader = new SequenceFile.Reader(fs, path, conf);
-            while (reader.next(key, value)) {
-                System.out.println("Key: " + key.get() + " fitness: " + value.getFitness());
-                value = new HeuristicsNetImpl();
-            }
-        } finally {
-            IOUtils.closeStream(reader);
-        }
-    }
-
 
     @Test
     public void testReadResults() throws Exception {
-        for (int i = 0; i < 10; i++) {
-            readPopulation(MinerDriver.OUTPUT_PATH + i + "/part-00000");
+        for (int i = 0; i < 4; i++) {
+           // readPopulation(MinerDriver.POPULATIONS_PATH + i + "/part-00000");
+            readPopulation("/Users/anton/gen10/part-0000" + i);
         }
     }
 
@@ -113,7 +135,15 @@ public class MinerDriverTest {
 
     @Test
     public void testGenMiner() throws Exception {
-        XLogInfo logInfo = MinerDriver.getLogInfo();
+        long start = System.currentTimeMillis();
+        settings.setPopulationSize(6000);
+        settings.setMaxGeneration(6);
+
+        XesXmlParser parser = new XesXmlParser();
+        List<XLog> logs = parser.parse(new File("logs/example1.xes"));
+        XLog log = logs.get(0);
+        logInfo = XLogInfoFactory.createLogInfo(log);
+
         HeuristicsNet[] population = new HeuristicsNet[settings.getPopulationSize()];
         Fitness fitness = FitnessFactory.getFitness(settings.getFitnessType(), logInfo,
                 FitnessFactory.ALL_FITNESS_PARAMETERS);
@@ -154,6 +184,8 @@ public class MinerDriverTest {
 
         System.out.println("N = " + populationNumber + " popSize = " + population.length);
         System.out.println(Arrays.toString(bestFitness));
+        long elapsed = System.currentTimeMillis() - start;
+        System.out.println("Elapsed: " + elapsed / 1000);
     }
 
     private void updateStatistics(int populationNumber, HeuristicsNet[] population) {
@@ -203,6 +235,4 @@ public class MinerDriverTest {
             IOUtils.closeStream(reader);
         }
     }
-
-
 }

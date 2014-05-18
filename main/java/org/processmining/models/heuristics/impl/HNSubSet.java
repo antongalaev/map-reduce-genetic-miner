@@ -1,6 +1,6 @@
 package org.processmining.models.heuristics.impl;
 
-import com.galaev.mapreduce.geneticminer.writables.arrays.IntArrayWritable;
+import com.galaev.genminer.mapred.writables.arrays.IntArrayWritable;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableComparable;

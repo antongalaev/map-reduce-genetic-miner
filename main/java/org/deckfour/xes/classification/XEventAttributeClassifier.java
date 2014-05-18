@@ -38,7 +38,7 @@
  */
 package org.deckfour.xes.classification;
 
-import com.galaev.mapreduce.geneticminer.writables.arrays.StringArrayWritable;
+import com.galaev.genminer.mapred.writables.arrays.StringArrayWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableComparable;
