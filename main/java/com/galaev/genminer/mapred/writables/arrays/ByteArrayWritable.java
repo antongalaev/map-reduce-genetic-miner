@@ -4,10 +4,9 @@ import org.apache.hadoop.io.ArrayWritable;
 import org.apache.hadoop.io.ByteWritable;
 
 /**
- * Created with IntelliJ IDEA.
- * User: anton
- * Date: 03/05/2014
- * Time: 19:43
+ * Writable wrapper for byte arrays.
+ *
+ * @author Anton Galaev
  */
 public class ByteArrayWritable extends ArrayWritable {
     public ByteArrayWritable() {

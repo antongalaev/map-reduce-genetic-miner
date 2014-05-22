@@ -20,6 +20,7 @@ import java.util.Map;
  * Genetic Miner algorithm.
  *
  * @author Ana Karla Alves de Medeiros
+ * @author Anton Galaev
  *
  */
 

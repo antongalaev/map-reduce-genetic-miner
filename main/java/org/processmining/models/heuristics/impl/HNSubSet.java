@@ -15,6 +15,7 @@ import java.util.Map;
  * input and output sets of <code>HeuristicsNet</code> objects.
  *
  * @author Peter van den Brand and Ana Karla Alves de Medeiros
+ * @author Anton Galaev
  *
  */
 public class HNSubSet implements WritableComparable<HNSubSet> {

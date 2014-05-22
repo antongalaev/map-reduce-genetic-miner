@@ -72,6 +72,7 @@ sample} to construct random matrices. </td>
  </table>
 
  @author wolfgang.hoschek@cern.ch
+ @author Anton Galaev
  @version 1.0, 09/24/99
  */
 public class DoubleFactory2D extends cern.colt.PersistentObject {

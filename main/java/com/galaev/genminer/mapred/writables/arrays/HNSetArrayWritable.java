@@ -4,10 +4,9 @@ import org.apache.hadoop.io.ArrayWritable;
 import org.processmining.models.heuristics.impl.HNSet;
 
 /**
- * Created with IntelliJ IDEA.
- * User: anton
- * Date: 04/05/2014
- * Time: 16:26
+ * Writable wrapper for HNSet arrays.
+ *
+ * @author Anton Galaev
  */
 public class HNSetArrayWritable extends ArrayWritable {
     public HNSetArrayWritable() {

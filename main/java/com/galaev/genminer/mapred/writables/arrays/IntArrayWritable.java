@@ -4,10 +4,9 @@ import org.apache.hadoop.io.ArrayWritable;
 import org.apache.hadoop.io.IntWritable;
 
 /**
- * Created with IntelliJ IDEA.
- * User: anton
- * Date: 03/05/2014
- * Time: 17:09
+ * Writable wrapper for int arrays.
+ *
+ * @author Anton Galaev
  */
 public class IntArrayWritable extends ArrayWritable {
 

@@ -52,6 +52,7 @@ import java.io.IOException;
  * be referring to the same higher-level concept.
  *
  * @author Christian W. Guenther (christian@deckfour.org)
+ * @author Anton Galaev
  *
  */
 public class XEventClass implements WritableComparable<XEventClass> {

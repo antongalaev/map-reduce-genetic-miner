@@ -4,10 +4,9 @@ import org.apache.hadoop.io.ArrayWritable;
 import org.deckfour.xes.classification.XEventClass;
 
 /**
- * Created with IntelliJ IDEA.
- * User: anton
- * Date: 04/05/2014
- * Time: 14:04
+ * Writable wrapper for XEventClass arrays.
+ *
+ * @author Anton Galaev
  */
 public class XEventClassArrayWritable extends ArrayWritable {
     public XEventClassArrayWritable() {

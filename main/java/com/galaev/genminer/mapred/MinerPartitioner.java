@@ -8,10 +8,10 @@ import org.processmining.models.heuristics.impl.HeuristicsNetImpl;
 import java.util.Random;
 
 /**
- * Created with IntelliJ IDEA.
- * User: anton
- * Date: 09/05/2014
- * Time: 14:38
+ * Custom partitioner for MapReduce Genetic Miner algorithm.
+ * Reducer number is chosen randomly.
+ *
+ * @author Anton Galaev
  */
 public class MinerPartitioner implements Partitioner<IntWritable, HeuristicsNetImpl> {
 

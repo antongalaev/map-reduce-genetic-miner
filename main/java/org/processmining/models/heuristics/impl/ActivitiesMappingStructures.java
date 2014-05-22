@@ -19,6 +19,7 @@ import java.util.*;
  * object.
  *
  * @author Ana Karla Alves de Medeiros
+ * @author Anton Galaev
  *
  */
 public class ActivitiesMappingStructures implements Writable {

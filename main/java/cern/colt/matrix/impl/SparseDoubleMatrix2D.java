@@ -74,6 +74,7 @@ import java.io.IOException;
  @see cern.colt.map
  @see cern.colt.map.OpenIntDoubleHashMap
  @author wolfgang.hoschek@cern.ch
+ @author Anton Galaev
  @version 1.0, 09/24/99
  */
 public class SparseDoubleMatrix2D extends DoubleMatrix2D implements Writable {

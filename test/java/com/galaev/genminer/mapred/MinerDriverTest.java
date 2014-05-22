@@ -33,11 +33,18 @@ import org.processmining.plugins.heuristicsnet.miner.genetic.util.MethodsOverHeu
 
 import javax.swing.*;
 import java.io.File;
+import java.io.InputStream;
 import java.util.*;
 
 import static junit.framework.Assert.assertEquals;
 
 
+/**
+ * Some tests for {@code MinerDriver} class.
+ *
+ * @see com.galaev.genminer.mapred.MinerDriver
+ * @author Anton Galaev
+ */
 @Ignore
 public class MinerDriverTest {
 
@@ -49,7 +56,7 @@ public class MinerDriverTest {
     public static void setUp() throws Exception {
         XesXmlParser parser = new XesXmlParser();
         //List<XLog> logs = parser.parse(new File("/Users/anton/Downloads/Chapter_8/reviewing.xes"));
-        List<XLog> logs = parser.parse(new File("logs/example1.xes"));
+        List<XLog> logs = parser.parse(new File("/Users/anton/Dropbox/Coursework/logs/example-logs/exercise5.xes"));
         XLog log = logs.get(0);
         logInfo = XLogInfoFactory.createLogInfo(log);
     }
@@ -60,7 +67,7 @@ public class MinerDriverTest {
         List<HeuristicsNetImpl> result = new ArrayList<>();
         for (int i = 0; i < 4; i++) {
             // readPopulation(MinerDriver.POPULATIONS_PATH + i + "/part-00000");
-            result.addAll(Arrays.asList(readPopulation("/Users/anton/gen10/part-0000" + i)));
+            result.addAll(Arrays.asList(readPopulation("/Users/anton/gen3/part-0000" + i)));
         }
         final HeuristicsMinerVisualizationPanel panel = new HeuristicsMinerVisualizationPanel(null,
                 result.toArray(new HeuristicsNet[result.size()]));
@@ -102,7 +109,7 @@ public class MinerDriverTest {
         HeuristicsNetImpl[] population = (HeuristicsNetImpl[]) fitness.calculate(result.toArray(new HeuristicsNetImpl[result.size()]));
         System.out.println("\n Continuous new " + Collections.min(Arrays.asList(population)).getFitness() +
                 " - " + Collections.max(Arrays.asList(population)).getFitness());
-        //printFitness(population);
+        printFitness(population);
 //
 //        fitness = FitnessFactory.getFitness(4, logInfo, FitnessFactory.ALL_FITNESS_PARAMETERS);
 //        population = (HeuristicsNetImpl[]) fitness.calculate(population);
@@ -113,19 +120,19 @@ public class MinerDriverTest {
         return population;
     }
 
-    private static void printFitness(HeuristicsNetImpl[] population) {
+    public static void printFitness(HeuristicsNetImpl[] population) {
         for (HeuristicsNetImpl aPopulation : population) {
-            System.out.println(aPopulation.getFitness());
+            System.out.print(aPopulation.getFitness() + "---");
         }
     }
 
 
     @Test
     public void testReadResults() throws Exception {
-        for (int i = 0; i < 4; i++) {
+        //for (int i = 0; i < 4; i++) {
            // readPopulation(MinerDriver.POPULATIONS_PATH + i + "/part-00000");
-            readPopulation("/Users/anton/gen10/part-0000" + i);
-        }
+            readPopulation("/Users/anton/Documents/result_at_1400708966783");
+        //}
     }
 
 
@@ -201,7 +208,7 @@ public class MinerDriverTest {
         FileSystem fs = FileSystem.get(conf);
         Path path = new Path(INPUT_PATH);
 
-        XLogInfo logInfo = MinerDriver.getLogInfo();
+        XLogInfo logInfo = getLogInfo();
         GeneticMinerSettings settings = new GeneticMinerSettings();
         Random generator = new Random(settings.getSeed());
         HeuristicsNet[] population = new HeuristicsNet[settings.getPopulationSize()];
@@ -233,6 +240,27 @@ public class MinerDriverTest {
             }
         } finally {
             IOUtils.closeStream(reader);
+        }
+    }
+
+    /**
+     * Copied from {@code MinerDriver} class.
+     * @see com.galaev.genminer.mapred.MinerDriver
+     * @return log info
+     * @throws Exception
+     */
+    private XLogInfo getLogInfo() throws Exception {
+        Path path = new Path("hdfs://localhost:9000/user/anton/log.xes");
+        FileSystem fs = FileSystem.get(new Configuration());
+        InputStream in = null;
+        try {
+            XesXmlParser parser = new XesXmlParser();
+            in = fs.open(path);
+            List<XLog> logs = parser.parse(in);
+            XLog log = logs.get(0);
+            return XLogInfoFactory.createLogInfo(log);
+        } finally {
+            IOUtils.closeStream(in);
         }
     }
 }

@@ -32,6 +32,7 @@ import java.io.IOException;
  Overrides many methods for performance reasons only.
 
  @author wolfgang.hoschek@cern.ch
+ @author Anton Galaev
  @version 1.0, 09/24/99
  @see	    java.util.HashMap
  */

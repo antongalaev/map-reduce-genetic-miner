@@ -4,10 +4,9 @@ import org.apache.hadoop.io.ArrayWritable;
 import org.apache.hadoop.io.DoubleWritable;
 
 /**
- * Created with IntelliJ IDEA.
- * User: anton
- * Date: 03/05/2014
- * Time: 19:40
+ * Writable wrapper for double arrays.
+ *
+ * @author Anton Galaev
  */
 public class DoubleArrayWritable extends ArrayWritable {
     public DoubleArrayWritable() {

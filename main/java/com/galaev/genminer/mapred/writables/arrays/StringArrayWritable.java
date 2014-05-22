@@ -4,10 +4,9 @@ import org.apache.hadoop.io.ArrayWritable;
 import org.apache.hadoop.io.Text;
 
 /**
- * Created with IntelliJ IDEA.
- * User: anton
- * Date: 04/05/2014
- * Time: 02:37
+ * Writable wrapper for String arrays.
+ *
+ * @author Anton Galaev
  */
 public class StringArrayWritable extends ArrayWritable {
     public StringArrayWritable() {

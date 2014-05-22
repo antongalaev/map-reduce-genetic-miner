@@ -57,6 +57,7 @@ import java.util.Arrays;
  * (configurable) attributes, they have the same values.
  *
  * @author Christian W. Guenther (christian@deckfour.org)
+ * @author Anton Galaev
  *
  */
 public class XEventAttributeClassifier implements XEventClassifier,

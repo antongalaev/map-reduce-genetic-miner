@@ -63,6 +63,7 @@ import java.util.HashMap;
  * events.
  *
  * @author Christian W. Guenther (christian@deckfour.org)
+ * @author Anton Galaev
  *
  */
 public class XEventClasses implements Writable {

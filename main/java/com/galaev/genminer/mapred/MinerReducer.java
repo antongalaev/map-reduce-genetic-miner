@@ -26,19 +26,21 @@ import java.util.List;
 import java.util.Random;
 
 /**
- * Created with IntelliJ IDEA.
- * User: anton
- * Date: 04/04/2014
- * Time: 23:59
+ * Reducer class for MapReduce Genetic Miner algorithm.
+ * Creates a new generation from the bunch of individuals, that
+ * come inside.
+ *
+ * @see com.galaev.genminer.mapred.MinerDriver
+ * @author Anton Galaev
  */
 public class MinerReducer extends MapReduceBase
         implements Reducer<IntWritable, HeuristicsNetImpl, IntWritable, HeuristicsNetImpl> {
 
     private static final Logger logger = LoggerFactory.getLogger(MinerReducer.class);
 
+    // settings and other necessary tools for creating the population
     GeneticMinerSettings settings = new GeneticMinerSettings();
     Random generator = new Random(settings.getSeed());
-
     Crossover crossover = CrossoverFactory.getCrossover(settings.getCrossoverType(), generator);
     Mutation mutation = MutationFactory.getMutation(settings.getMutationType(), generator,
             settings.getMutationRate());
@@ -47,28 +49,32 @@ public class MinerReducer extends MapReduceBase
     BuildPopulation buildNextPopulation = NextPopulationFactory.getPopulation(selectionMethod, generator, settings
             .getCrossoverRate(), settings.getMutationRate(), settings.getElitismRate(), crossover, mutation);
 
-    {
-        logger.info("In reducer " + this.toString());
-    }
-
+    /**
+     * Reduce method.
+     * Reads input values into array. Performs genetic operations
+     * over that array(selection, crossover and mutation). Thus, creates a new generation.
+     *
+     * @param key number of the split
+     * @param values all nets in the split
+     * @param output collector
+     * @param reporter reporter
+     * @throws IOException
+     */
     @Override
     public void reduce(IntWritable key, Iterator<HeuristicsNetImpl> values, OutputCollector<IntWritable, HeuristicsNetImpl> output, Reporter reporter) throws IOException {
-        // collect the input into array
+        // collect the input values into array
         List<HeuristicsNet> netsList = new ArrayList<>();
         while (values.hasNext()) {
            netsList.add(values.next().copy());
         }
         HeuristicsNet[] nets = netsList.toArray(new HeuristicsNet[netsList.size()]);
-
         // build next population
-        HeuristicsNet[] result = buildNextPopulation.build(nets);
+        HeuristicsNet[] next = buildNextPopulation.build(nets);
 
-        // write it to the output with the right keys
-        for (HeuristicsNet heuristicsNet : result) {
+        // write it to the output with original keys
+        for (HeuristicsNet heuristicsNet : next) {
             HeuristicsNetImpl net = (HeuristicsNetImpl) heuristicsNet;
             output.collect(new IntWritable(net.getKey()), net);
-            //logger.info("Key: " + net.getKey() + " fitness: " + net.getFitness());
         }
-        //logger.info("Population part #" + key + " is reduced. Size = " + nets.length);
     }
 }

@@ -12,6 +12,7 @@ import java.util.Map;
  * in the input and output sets of <code>HeuristicsNet</code> objects.
  *
  * @author Peter van den Brand and Ana Karla Alves de Medeiros
+ * @author Anton Galaev
  *
  */
 public class HNSet implements Writable {
